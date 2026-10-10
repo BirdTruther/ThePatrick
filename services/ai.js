@@ -6,8 +6,26 @@ const { logCommand, logSystemEvent } = require('../logger.js');
 const { getCurrentPersona, getPersonaErrorMessage } = require('../persona-manager.js');
 
 // ===== CONFIG =====
-const AI_PRIMARY_MODEL  = 'gemini-2.5-flash';
-const AI_FALLBACK_MODEL = 'gemini-2.0-flash';
+// Override in .env. Changing the model is fully reversible: edit AI_PRIMARY_MODEL
+// and restart — no code change. Verified options (paid, per 1M in/out):
+//   gemini-3.1-flash-lite  $0.25 / $1.50  (newer + cheapest, beats 2.5 Flash)
+//   gemini-2.5-flash       $0.30 / $2.50  (previous default)
+//   gemini-3-flash-preview $0.50 / $3.00
+//   gemini-3.8-flash       $0.75 / $3.75
+const AI_PRIMARY_MODEL  = process.env.AI_PRIMARY_MODEL  || 'gemini-3.1-flash-lite';
+const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL || 'gemini-2.5-flash';
+
+// The bot needs to know "when" it is. Inject the live date/time into every
+// interactive prompt so it stops answering as if it's stuck in its training data.
+function currentTimeContext() {
+    const now = new Date();
+    const tz = process.env.BOT_TIMEZONE || undefined;
+    const date = now.toLocaleDateString('en-US',
+        { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: tz });
+    const time = now.toLocaleTimeString('en-US',
+        { hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: tz });
+    return `Right now it's ${date}, ${time}. Treat this as the current moment — it is NOT ${now.getFullYear() - 2} and you are not "an AI with a 2023 cutoff".`;
+}
 
 // ===== WILD REQUEST FILTER =====
 const WILD_PATTERNS = [
@@ -181,6 +199,8 @@ async function getAIResponse(message, platform = 'discord', channelId = 'default
 
         let systemPrompt = `${currentPersona.systemPrompt}
 
+${currentTimeContext()}
+
 ==== CONVERSATION CONTEXT ====
 ${memoryContext}
 ${memorySection}
@@ -243,6 +263,8 @@ async function getWildRequestResponse(messageText, platform, channelId, username
 
     const roastPrompt = `${persona.systemPrompt}
 
+${currentTimeContext()}
+
 **SPECIAL SITUATION — WILD/UNHINGED REQUEST:**
 The user sent a completely wild, inappropriate, or unhinged request that you will NOT comply with.
 Do NOT fulfill the request. Do NOT explain policies or rules.
@@ -289,6 +311,8 @@ async function generateHateRoast(username, userId, reasonContext = '', facts = '
         ? `You may also sneak these remembered details about them into the roast if they fit (hit hard where it hurts, this is ammunition):\n${facts}\n`
         : '';
     const prompt = `${persona.systemPrompt}
+
+${currentTimeContext()}
 
 **SPECIAL SITUATION — RANDOM HATE ROAST:**
 You're being ${reason}.

@@ -34,7 +34,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 |---|---|
 | Runtime | Node.js ≥ 20.18.1 |
 | Discord | discord.js 14 + @discordjs/voice 0.19.2 |
-| AI | Google Gemini via `@ai-sdk/google` (text `gemini-2.5-flash`, images `gemini-3.1-flash-image`) |
+| AI | Google Gemini via `@ai-sdk/google` (text model set by `AI_PRIMARY_MODEL`, default `gemini-3.1-flash-lite`; images `gemini-3.1-flash-image`) |
 | Database | SQLite via `better-sqlite3` |
 | Dashboard | Express + vanilla HTML |
 | Music | `yt-dlp` + `ffmpeg` (system binaries) |
