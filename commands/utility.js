@@ -180,6 +180,22 @@ function postImageViaWebhook(webhookUrl, imageBuffer, filename, mimeType) {
 
 // ===== DISCORD SAFE SEND UTILITIES =====
 
+// Keeps the "ThePatrick is typing..." indicator alive while awaiting slow AI
+// work. A single sendTyping() only lasts ~10s, but image generation and long
+// chat completions run well past that, so it refreshes every 8s until the
+// wrapped task settles (success or error) and always cleans up.
+async function withTyping(channel, task) {
+    if (!channel || typeof channel.sendTyping !== 'function') return task();
+    const typist = () => { channel.sendTyping().catch(() => {}); };
+    typist();
+    const keepAlive = setInterval(typist, 8000);
+    try {
+        return await task();
+    } finally {
+        clearInterval(keepAlive);
+    }
+}
+
 async function safeDiscordReply(message, content) {
     try {
         if (content.length <= 2000) {
@@ -364,4 +380,5 @@ module.exports = {
     extractImagePrompt,
     safeDiscordReply,
     safeDiscordSend,
+    withTyping,
 };

@@ -33,6 +33,7 @@ const {
     extractImagePrompt,
     safeDiscordReply,
     safeDiscordSend,
+    withTyping,
 } = require('./commands/utility.js');
 
 // ===== GLOBAL STARTUP LOG =====
@@ -323,8 +324,8 @@ function startHateTimer(client) {
                 const roastFacts = targetFacts
                     || getContextFacts('discord', 'global', name.toLowerCase(), guildId);
 
-                await channel.sendTyping();
-                const roast = await generateHateRoast(name, target, 'roasting the member randomly, unprompted, just because they are on the hate list', roastFacts, guildId);
+                const roast = await withTyping(channel, () =>
+                    generateHateRoast(name, target, 'roasting the member randomly, unprompted, just because they are on the hate list', roastFacts, guildId));
 
                 safeDiscordSend(channel, roast);
                 // Record the roast as a bot message so Patrick can recall having
@@ -358,7 +359,8 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
     if (!userMessage && !hasImageAttachment(message)) return;
 
     if (isWildRequest(userMessage)) {
-        const roast = await getWildRequestResponse(userMessage, 'discord', channelId, username, message.guildId);
+        const roast = await withTyping(message.channel, () =>
+            getWildRequestResponse(userMessage, 'discord', channelId, username, message.guildId));
         await safeDiscordReply(message, roast);
         logCommand('discord', username, '@mention (wild)', userMessage, roast);
         return;
@@ -373,8 +375,7 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
         const cleanPrompt = sanitizeImagePrompt(extractImagePrompt(userMessage));
         logCommand('discord', username, '@mention (image)', cleanPrompt, '[generating...]');
         try {
-            await message.channel.sendTyping();
-            const result = await generateImage(cleanPrompt, message.author.id);
+            const result = await withTyping(message.channel, () => generateImage(cleanPrompt, message.author.id));
             if (!result.success) {
                 await safeDiscordReply(message, result.error);
                 return;
@@ -389,15 +390,17 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
     }
 
     if (hasImageAttachment(message)) {
-        const images   = await getImageAttachments(message);
-        let response = await getAIResponse(userMessage || 'What do you see?', 'discord', channelId, username, images, message.guildId);
+        const images = await getImageAttachments(message);
+        let response = await withTyping(message.channel, () =>
+            getAIResponse(userMessage || 'What do you see?', 'discord', channelId, username, images, message.guildId));
         response = augmentReplyWithHate(message.author.id, username, response, message.guildId);
         await safeDiscordReply(message, response);
         logCommand('discord', username, '@mention (image analysis)', userMessage, response);
         return;
     }
 
-    let response = await getAIResponse(userMessage, 'discord', channelId, username, [], message.guildId);
+    let response = await withTyping(message.channel, () =>
+        getAIResponse(userMessage, 'discord', channelId, username, [], message.guildId));
     response = augmentReplyWithHate(message.author.id, username, response, message.guildId);
     await safeDiscordReply(message, response);
     logCommand('discord', username, '@mention', userMessage, response);
@@ -422,22 +425,25 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
     if (!userMessage && !hasImageAttachment(message)) return;
 
     if (isWildRequest(userMessage)) {
-        const roast = await getWildRequestResponse(userMessage, 'discord', channelId, username, message.guildId);
+        const roast = await withTyping(message.channel, () =>
+            getWildRequestResponse(userMessage, 'discord', channelId, username, message.guildId));
         await safeDiscordReply(message, roast);
         logCommand('discord', username, 'reply (wild)', userMessage, roast);
         return;
     }
 
     if (hasImageAttachment(message)) {
-        const images   = await getImageAttachments(message);
-        let response = await getAIResponse(userMessage || 'What do you see?', 'discord', channelId, username, images, message.guildId);
+        const images = await getImageAttachments(message);
+        let response = await withTyping(message.channel, () =>
+            getAIResponse(userMessage || 'What do you see?', 'discord', channelId, username, images, message.guildId));
         response = augmentReplyWithHate(message.author.id, username, response, message.guildId);
         await safeDiscordReply(message, response);
         logCommand('discord', username, 'reply (image analysis)', userMessage, response);
         return;
     }
 
-    let response = await getAIResponse(userMessage, 'discord', channelId, username, [], message.guildId);
+    let response = await withTyping(message.channel, () =>
+        getAIResponse(userMessage, 'discord', channelId, username, [], message.guildId));
     response = augmentReplyWithHate(message.author.id, username, response, message.guildId);
     await safeDiscordReply(message, response);
     logCommand('discord', username, 'reply', userMessage, response);
