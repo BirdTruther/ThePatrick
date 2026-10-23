@@ -88,40 +88,83 @@ function mimeToExt(mimeType) {
     return sub === 'jpeg' ? 'jpg' : sub;
 }
 
+function attachmentIsImage(att) {
+    return att.contentType?.startsWith('image/') ||
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(att.name || '');
+}
+
 function hasImageAttachment(message) {
-    if (message.attachments.size === 0) return false;
-    return message.attachments.some(att =>
-        att.contentType?.startsWith('image/') ||
-        /\.(jpg|jpeg|png|gif|webp)$/i.test(att.name || '')
-    );
+    // Real file uploads live in message.attachments.
+    if (message.attachments?.size) {
+        for (const [, att] of message.attachments) {
+            if (attachmentIsImage(att)) return true;
+        }
+    }
+    // Discord delivers pasted/linked media (Tenor, Giphy, Klipy, Imgur…) as
+    // auto-embeds, NOT attachments. Without counting those, Patrick goes
+    // blind on every GIF link in the server.
+    if (message.embeds?.some(e => e.type === 'image' && e.image?.url)) return true;
+    // Last resort: direct image links that were NOT auto-embedded.
+    return /\.(jpe?g|png|webp|gif)(\?[^ ]*)?(\s|$)/i.test(message.content || '');
+}
+
+function imageUrlsToFetch(message) {
+    const queue   = [];
+    const seen    = new Set();
+    const pushUrl = (url, label) => {
+        if (url && /^https?:\/\//i.test(url) && !seen.has(url)) {
+            seen.add(url);
+            queue.push({ url, label });
+        }
+    };
+    for (const [, attachment] of message.attachments) {
+        if (attachmentIsImage(attachment)) pushUrl(attachment.url, attachment.name);
+    }
+    for (const embed of message.embeds || []) {
+        if (embed.type === 'image') pushUrl(embed.image?.url, embed.provider?.name || 'image embed');
+    }
+    // Tenor/giphy links sometimes skip auto-embedding entirely.
+    for (const raw of (message.content || '').match(/https?:\/\/[^\s<>"']+/gi) || []) {
+        if (/\.(jpe?g|png|webp|gif)(\?[^ ]*)?$/i.test(raw)) pushUrl(raw, 'content link');
+    }
+    return queue;
+}
+
+function inferImageContentType(url, fallback) {
+    if (fallback && fallback.startsWith('image/')) return fallback;
+    if (/\.jpe?g(\?|$)/i.test(url)) return 'image/jpeg';
+    if (/\.png(\?|$)/i.test(url))  return 'image/png';
+    if (/\.webp(\?|$)/i.test(url)) return 'image/webp';
+    return 'image/gif';
+}
+
+async function fetchImageFromUrl(url, label) {
+    const headRes = await fetch(url, { method: 'HEAD' });
+    const contentLength = parseInt(headRes.headers.get('content-length') || '0', 10);
+    if (contentLength > MAX_IMAGE_BYTES) {
+        console.warn(`[IMAGE] "${label}" is ${(contentLength / 1024 / 1024).toFixed(1)}MB — over limit, skipping.`);
+        logSystemEvent('IMAGE_SKIP', 'WARNING', 'image',
+            `Image "${label}" skipped: ${(contentLength / 1024 / 1024).toFixed(1)}MB exceeds limit`);
+        return null;
+    }
+    const response    = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    return {
+        buffer: Buffer.from(arrayBuffer),
+        contentType: inferImageContentType(url, response.headers.get('content-type')),
+        name: label,
+    };
 }
 
 async function getImageAttachments(message) {
     const images = [];
-    for (const [, attachment] of message.attachments) {
-        if (
-            attachment.contentType?.startsWith('image/') ||
-            /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.name || '')
-        ) {
-            try {
-                const headRes       = await fetch(attachment.url, { method: 'HEAD' });
-                const contentLength = parseInt(headRes.headers.get('content-length') || '0', 10);
-                if (contentLength > MAX_IMAGE_BYTES) {
-                    console.warn(`[IMAGE] "${attachment.name}" is ${(contentLength / 1024 / 1024).toFixed(1)}MB — over limit, skipping.`);
-                    logSystemEvent('IMAGE_SKIP', 'WARNING', 'image',
-                        `Attachment "${attachment.name}" skipped: ${(contentLength / 1024 / 1024).toFixed(1)}MB exceeds limit`);
-                    continue;
-                }
-                const response      = await fetch(attachment.url);
-                const arrayBuffer   = await response.arrayBuffer();
-                images.push({
-                    buffer:      Buffer.from(arrayBuffer),
-                    contentType: attachment.contentType || 'image/jpeg',
-                    name:        attachment.name,
-                });
-            } catch (err) {
-                console.error('[IMAGE] Failed to fetch attachment:', err.message);
-            }
+    for (const { url, label } of imageUrlsToFetch(message)) {
+        try {
+            const image = await fetchImageFromUrl(url, label);
+            if (image) images.push(image);
+        } catch (err) {
+            console.error('[IMAGE] Failed to fetch attachment:', err.message);
+            logSystemEvent('IMAGE_ERROR', 'WARNING', 'image', `Failed to fetch "${label}": ${err.message}`, err);
         }
     }
     return images;

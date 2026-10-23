@@ -342,6 +342,18 @@ function startHateTimer(client) {
     }, 60 * 60 * 1000); // every 1 hour
 }
 
+// Logs what Discord actually delivered with a message (attachments vs embeds
+// vs content link). When "image recognition" seems broken, this line tells us
+// whether the media even reached the bot, and in which form.
+function logMessageShape(message, username) {
+    const attachments = message.attachments.size;
+    const embeds      = message.embeds || [];
+    if (!attachments && !embeds.length) return;
+    const types  = embeds.map(e => e.type).join(',') || '-';
+    const kinds  = [...message.attachments.values()].map(a => a.contentType || 'unknown').join(', ') || '-';
+    console.log(`[MSG-SHAPE] ${username}: attachments=${attachments} (${kinds}) embeds=${embeds.length} (${types})`);
+}
+
 // ===== DISCORD MESSAGE HANDLER =====
 discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ guildId: message.guildId }, async () => {
     if (message.author.bot) return;
@@ -354,6 +366,7 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
 
     addToMemory('discord', channelId, username, message.content);
     console.log(`[DISCORD] ${username}: ${message.content}`);
+    logMessageShape(message, username);
 
     const userMessage = message.content.replace(/<@!?\d+>/g, '').trim();
     if (!userMessage && !hasImageAttachment(message)) return;
@@ -420,6 +433,7 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
 
     addToMemory('discord', channelId, username, message.content);
     console.log(`[DISCORD REPLY] ${username}: ${message.content}`);
+    logMessageShape(message, username);
 
     const userMessage = message.content.replace(/<@!?\d+>/g, '').trim();
     if (!userMessage && !hasImageAttachment(message)) return;
