@@ -66,7 +66,7 @@ commands/
 services/
   ai.js                     # Text generation + vision, through opencode-chat.js
   opencode-chat.js          # Client for the no-tools OpenCode chat server
-  image.js                  # Gemini image generation + rate limiting
+  image.js                  # Cloudflare Workers AI image generation + rate limiting
   twitch.js                 # Twitch IRC — self-initializing on require
 public/
   dashboard.html            # Dashboard frontend
