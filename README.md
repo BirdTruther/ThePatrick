@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/github/v/release/BirdTruther/ThePatrick)
 
-Multi-platform Discord + Twitch bot with Escape from Tarkov integration, CS2 integration, Gemini AI, voice music, roleplay features, and a live web dashboard.
+Multi-platform Discord + Twitch bot with Escape from Tarkov integration, CS2 integration, AI chat, voice music, roleplay features, and a live web dashboard.
 
 **[Commands →](COMMANDS.md)** | **[Self-Hosting & License →](SETUP.md)**
 
@@ -16,7 +16,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 
 ## What It Does
 
-- **AI chat** — Mention the bot or reply to it. Supports text, image understanding, and image generation via Gemini.
+- **AI chat** — Mention the bot or reply to it. Supports text, image understanding, and image generation via Cloudflare Workers AI.
 - **Long-term memory** — The AI builds one durable server-wide "fact sheet" (names, mains, inside jokes) and references it across channels; also feeds roasts. Hourly, cost-bounded consolidation, with **pinned facts** that survive AI rewrites.
 - **Tarkov** — Item prices, ammo rankings, trader timers, map/boss info, player stats.
 - **Tarkov Allergies** — Roleplay allergy tracking; log and compare what members are allergic to.
