@@ -1,14 +1,14 @@
 // services/ai.js
-const { createChatClient, hasImage } = require('./opencode-chat.js');
+const { createChatClient } = require('./cloudflare-chat.js');
 const { addToMemory, getSmartContext, getLongTermFacts, getContextFacts, saveFacts, getLastConsolidatedId, setLastConsolidatedId, getNewMessagesSince, MIN_NEW_MESSAGES, FACT_MAX, SHARED_SCOPE } = require('../memory.js');
 const { logCommand, logSystemEvent } = require('../logger.js');
 const { getCurrentPersona, getPersonaErrorMessage } = require('../persona-manager.js');
 
 // ===== CONFIG =====
-// Override in .env as provider/model, then restart. Text goes to the primary model.
-// Beam rejects images, so messages with pictures go straight to the fallback.
-const AI_PRIMARY_MODEL  = process.env.AI_PRIMARY_MODEL  || 'opencode-go/beam-free';
-const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL || 'opencode-go/deepseek-v4.1-flash';
+// Cloudflare Workers AI models. Override in .env and restart. Both must be on the
+// free plan and accept images: paid-only models fail on a free Cloudflare account.
+const AI_PRIMARY_MODEL  = process.env.AI_PRIMARY_MODEL  || '@cf/meta/llama-4-scout-17b-16e-instruct';
+const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL || '@cf/google/gemma-4-26b-a4b-it';
 const chatClient = createChatClient();
 
 // The bot needs to know "when" it is. Inject the live date/time into every
@@ -42,12 +42,9 @@ function isWildRequest(messageContent) {
 // ===== CORE AI FUNCTIONS =====
 
 async function generateTextWithFallback(options) {
-    if (hasImage(options)) return chatClient.generate(AI_FALLBACK_MODEL, options);
     try {
         return await chatClient.generate(AI_PRIMARY_MODEL, options);
     } catch (primaryErr) {
-        // Any failure falls back: Beam's free pricing is only for a limited time,
-        // so the primary can disappear rather than just being overloaded.
         console.warn(`[AI] ${AI_PRIMARY_MODEL} failed — falling back to ${AI_FALLBACK_MODEL}`);
         logSystemEvent('AI_FALLBACK', 'WARNING', 'ai',
             `Primary model failed, falling back to ${AI_FALLBACK_MODEL}: ${primaryErr.message.substring(0, 120)}`
