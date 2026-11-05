@@ -1,8 +1,8 @@
 // guild-automation.js
-// Replaces Maki's server jobs: the access role, temporary voice channels, and
-// welcome and leave messages. While Maki is still in a server, Patrick leaves its
+// Replaces Maki's server jobs: the access role, reaction roles, temporary voice
+// channels, and welcome and leave messages. While Maki is still in a server, Patrick leaves its
 // voice channels and messages alone so nothing happens twice, then takes over as
-// soon as Maki is removed. The access role is safe to give twice, so it always runs.
+// soon as Maki is removed. Roles are safe to set twice, so those always run.
 
 const { ChannelType, Events, Partials } = require('discord.js');
 
@@ -23,8 +23,28 @@ const GUILD_CONFIG = {
         welcomeChannelId: '1243696602959315045',
         voiceLobbyId: '1186505748423905361',
         voiceCategoryId: '367470993871994882',
+        // Each role changes only when someone adds or removes that reaction.
+        reactionRoles: {
+            '1470902576261238969': {
+                '🚀': '1470900763269009459', // Star Citizens
+                '🔫': '1470901468549742718', // Escape From Tarkov
+                '☠': '1364292576269565963', // 7 Days to Die
+                '🐟': '1470903122049237054', // Epic RPG Players
+                '🔪': '1510709202224414821', // CS2
+                '🐼': '1517789754823938138', // Zomboid
+                '🐒': '1536496312437182504', // Rust
+            },
+            '1459388003725082664': {
+                '👍': '1459380427063038140', // Cultist
+            },
+        },
     },
 };
+
+// Discord can send an emoji with or without its invisible style character.
+function emojiKey(name) {
+    return (name || '').replace(/\uFE0F/g, '');
+}
 
 function createGuildAutomation({ config = GUILD_CONFIG, store, log = () => {}, now = Date.now, makiUserId = MAKI_USER_ID }) {
     const loadedGuilds = new Set();
@@ -71,14 +91,39 @@ function createGuildAutomation({ config = GUILD_CONFIG, store, log = () => {}, n
         await channel?.send({ content: `<@${member.id}> has left! I wonder why?`, allowedMentions: { parse: [] } });
     }
 
-    // A 👍 on the rules is the backup way in. Taking it back doesn't remove access.
+    function reactionRoleFor(reaction, settings) {
+        return settings.reactionRoles?.[reaction.message.id]?.[emojiKey(reaction.emoji.name)] || null;
+    }
+
     async function onReactionAdd(reaction, user) {
         const { guild } = reaction.message;
         const settings = guild && config[guild.id];
         if (!settings || user.bot) return;
-        if (reaction.message.id !== settings.rulesMessageId || reaction.emoji.name !== '👍') return;
+
+        // A 👍 on the rules is the backup way in. Taking it back doesn't remove access.
+        const isRulesThumb = reaction.message.id === settings.rulesMessageId && reaction.emoji.name === '👍';
+        const roleId = reactionRoleFor(reaction, settings);
+        if (!isRulesThumb && !roleId) return;
+
         const member = await guild.members.fetch(user.id);
-        await giveAccessRole(member, settings, 'Reacted to the server rules');
+        if (isRulesThumb) await giveAccessRole(member, settings, 'Reacted to the server rules');
+        if (roleId) {
+            await member.roles.add(roleId, 'Reaction role');
+            log('REACTION_ROLE', 'INFO', `Reaction add: ${member.user?.username || member.id} -> ${roleId}`);
+        }
+    }
+
+    async function onReactionRemove(reaction, user) {
+        const { guild } = reaction.message;
+        const settings = guild && config[guild.id];
+        if (!settings || user.bot) return;
+        const roleId = reactionRoleFor(reaction, settings);
+        if (!roleId) return;
+
+        const member = await guild.members.fetch(user.id).catch(() => null); // They may have left the server.
+        if (!member) return;
+        await member.roles.remove(roleId, 'Reaction role removed');
+        log('REACTION_ROLE', 'INFO', `Reaction remove: ${member.user?.username || member.id} -> ${roleId}`);
     }
 
     function trackedVoiceChannels(guildId) {
@@ -172,7 +217,7 @@ function createGuildAutomation({ config = GUILD_CONFIG, store, log = () => {}, n
         }
     }
 
-    return { makiIsPresent, onMemberAdd, onMemberUpdate, onMemberRemove, onReactionAdd, onVoiceStateUpdate, onReady };
+    return { makiIsPresent, onMemberAdd, onMemberUpdate, onMemberRemove, onReactionAdd, onReactionRemove, onVoiceStateUpdate, onReady };
 }
 
 function registerGuildAutomation(client) {
@@ -196,7 +241,6 @@ function registerGuildAutomation(client) {
 
     const guarded = (name, handler) => async (...args) => {
         try {
-            if (args[0]?.partial && name === 'reaction') await args[0].fetch();
             await handler(...args);
         } catch (err) {
             log('GUILD_AUTOMATION_ERROR', 'ERROR', `${name} failed: ${err.message}`);
@@ -207,7 +251,8 @@ function registerGuildAutomation(client) {
     client.on(Events.GuildMemberAdd, guarded('member add', automation.onMemberAdd));
     client.on(Events.GuildMemberUpdate, guarded('member update', automation.onMemberUpdate));
     client.on(Events.GuildMemberRemove, guarded('member remove', automation.onMemberRemove));
-    client.on(Events.MessageReactionAdd, guarded('reaction', automation.onReactionAdd));
+    client.on(Events.MessageReactionAdd, guarded('reaction add', automation.onReactionAdd));
+    client.on(Events.MessageReactionRemove, guarded('reaction remove', automation.onReactionRemove));
     client.on(Events.VoiceStateUpdate, guarded('voice', automation.onVoiceStateUpdate));
 }
 

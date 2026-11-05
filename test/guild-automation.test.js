@@ -7,7 +7,8 @@ const { createGuildAutomation } = require('../guild-automation.js');
 const NOW = 1_000_000_000_000;
 const DAY = 24 * 60 * 60 * 1000;
 const config = {
-    g1: { accessRoleId: 'beaky', rulesMessageId: 'rules', welcomeChannelId: 'welcome', voiceLobbyId: 'lobby', voiceCategoryId: 'voice' },
+    g1: { accessRoleId: 'beaky', rulesMessageId: 'rules', welcomeChannelId: 'welcome', voiceLobbyId: 'lobby', voiceCategoryId: 'voice',
+        reactionRoles: { games: { '🔫': 'tarkov', '☠': 'sevendays' }, cultist: { '👍': 'cultist' } } },
 };
 
 function setup({ maki = false, recentJoin = true } = {}) {
@@ -53,7 +54,7 @@ function setup({ maki = false, recentJoin = true } = {}) {
             partial: false,
             joinedTimestamp: recentJoin ? NOW - DAY : NOW - 30 * DAY,
             user: { id, username: id, bot: extra.bot || false },
-            roles: { cache: { has: (role) => roles.has(role) }, add: async (role) => { roles.add(role); } },
+            roles: { cache: { has: (role) => roles.has(role) }, add: async (role) => { roles.add(role); }, remove: async (role) => { roles.delete(role); } },
             voice: { setChannel: extra.setChannel || (async (channel) => { member.movedTo = channel; }) },
             hasRole: (role) => roles.has(role),
         };
@@ -137,6 +138,54 @@ test('only a thumbs up on the rules message gives access', async () => {
     assert.strictEqual(member.hasRole('beaky'), false);
     await automation.onReactionAdd({ message: { id: 'rules', guild }, emoji: { name: '👍' } }, user);
     assert.ok(member.hasRole('beaky'));
+});
+
+test('reactions add and remove their own role only', async () => {
+    const { automation, guild, fakeMember } = setup({ recentJoin: false });
+    const member = fakeMember('someone');
+    const react = (id, name) => ({ message: { id, guild }, emoji: { name } });
+
+    await automation.onReactionAdd(react('games', '🔫'), member.user);
+    assert.ok(member.hasRole('tarkov'));
+    assert.strictEqual(member.hasRole('beaky'), false);
+
+    await automation.onReactionAdd(react('games', '☠️'), member.user); // Skull with its style character
+    assert.ok(member.hasRole('sevendays'));
+
+    await automation.onReactionAdd(react('cultist', '👍'), member.user);
+    assert.ok(member.hasRole('cultist'));
+
+    await automation.onReactionRemove(react('games', '🔫'), member.user);
+    assert.strictEqual(member.hasRole('tarkov'), false);
+    assert.ok(member.hasRole('sevendays'));
+});
+
+test('unmapped reactions, bots and members who left change nothing', async () => {
+    const { automation, guild, fakeMember } = setup({ recentJoin: false });
+    const member = fakeMember('someone', { roles: ['tarkov'] });
+    const react = (id, name) => ({ message: { id, guild }, emoji: { name } });
+
+    await automation.onReactionAdd(react('games', '6️⃣'), member.user);
+    await automation.onReactionRemove(react('other', '🔫'), member.user);
+    assert.ok(member.hasRole('tarkov'));
+
+    const bot = fakeMember('somebot', { bot: true });
+    await automation.onReactionAdd(react('games', '☠️'), bot.user);
+    assert.strictEqual(bot.hasRole('sevendays'), false);
+
+    guild.members.fetch = async () => { throw new Error('Unknown Member'); };
+    await automation.onReactionRemove(react('games', '🔫'), { id: 'gone', bot: false });
+});
+
+test('the rules thumbs up stays add-only, and a restart gives no reaction roles', async () => {
+    const { automation, guild, fakeMember } = setup();
+    const member = fakeMember('someone', { roles: ['beaky'] });
+    await automation.onReactionRemove({ message: { id: 'rules', guild }, emoji: { name: '👍' } }, member.user);
+    assert.ok(member.hasRole('beaky'));
+
+    await automation.onReady([guild]);
+    assert.strictEqual(member.hasRole('tarkov'), false);
+    assert.strictEqual(member.hasRole('cultist'), false);
 });
 
 test('welcome and leave messages stay quiet until Maki is gone', async () => {
