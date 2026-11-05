@@ -68,6 +68,29 @@ test('owner DM acks, runs the raw message and delivers the result', async () => 
     assert.deepStrictEqual(calls.sends, ['ok']);
 });
 
+test('long output falls back to raw text when the summary fails', async () => {
+    const calls = { replies: [], sends: [] };
+    const handler = createDmHandler({
+        allowed: parseAllowlist(OWNER),
+        runner: {
+            status: () => null,
+            run: async () => ({ text: 'z'.repeat(4000), toolCount: 1 }),
+        },
+        summarize: async () => { throw new Error('credits depleted'); },
+    });
+    await handler({
+        guildId: null,
+        author: { id: OWNER, bot: false },
+        content: 'long job',
+        reply: async () => ({ edit: async () => {} }),
+        channel: { send: async (text) => { calls.sends.push(text); } },
+    });
+    assert.ok(calls.sends.length >= 2);
+    assert.ok(calls.sends.every(text => typeof text === 'string' && text.length <= 2000));
+    assert.strictEqual(calls.sends.slice(0, -1).join(''), 'z'.repeat(4000));
+    assert.match(calls.sends.at(-1), /summary unavailable/);
+});
+
 test('empty allowlist allows nobody', () => {
     assert.strictEqual(parseAllowlist('').size, 0);
     assert.strictEqual(parseAllowlist(undefined).size, 0);

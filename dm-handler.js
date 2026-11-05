@@ -4,14 +4,31 @@
 // index.js. Anyone not on the allowlist gets total silence, so the bot never
 // advertises that this exists.
 
-const { AttachmentBuilder, Events } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+const { Events } = require('discord.js');
 
 const PROGRESS_EDIT_MS = 5000;
 const VERBATIM_LIMIT = 1500; // short answers are sent as written, not summarized
 const RAW_SUMMARY_LIMIT = 40000;
+const RAW_CHUNK_LIMIT = 3;
+const OUTPUT_DIR = path.join(__dirname, 'data', 'dm-output'); // gitignored
 
 function parseAllowlist(raw) {
     return new Set(String(raw || '').split(',').map(s => s.trim()).filter(Boolean));
+}
+
+// Keeps only the latest long output per user, so this can't grow without bound.
+function saveOutput(userId, text) {
+    try {
+        fs.mkdirSync(OUTPUT_DIR, { recursive: true, mode: 0o700 });
+        const file = path.join(OUTPUT_DIR, `last-${userId}.txt`);
+        fs.writeFileSync(file, text, { mode: 0o600 });
+        return file;
+    } catch (err) {
+        console.error('[DM HANDLER] Could not save output:', err.message);
+        return null;
+    }
 }
 
 function formatElapsed(ms) {
@@ -33,17 +50,19 @@ function createDmHandler({ allowed, runner, summarize, log = () => {} }) {
             await message.channel.send(text);
             return;
         }
-        let summary;
+        const savedTo = saveOutput(message.author.id, text);
+        const pointer = savedTo ? `Full output on the server: \`${savedTo}\`` : 'Full output could not be saved.';
         try {
-            summary = await summarize(text.slice(0, RAW_SUMMARY_LIMIT));
+            const summary = await summarize(text.slice(0, RAW_SUMMARY_LIMIT));
+            await message.channel.send(`${summary.slice(0, 1800)}\n\n${pointer}`);
+            return;
         } catch (err) {
             log('DM_SUMMARY_ERROR', 'WARNING', `Summary failed: ${err.message}`);
-            summary = `${text.slice(0, VERBATIM_LIMIT)}…\n\n(summary failed, full output attached)`;
         }
-        await message.channel.send({
-            content: summary.slice(0, 2000),
-            files: [new AttachmentBuilder(Buffer.from(text, 'utf8'), { name: 'agent-output.txt' })],
-        });
+        // No summary available, so send the raw text rather than nothing.
+        const chunks = text.match(/[\s\S]{1,1900}/g).slice(0, RAW_CHUNK_LIMIT);
+        for (const chunk of chunks) await message.channel.send(chunk);
+        await message.channel.send(`(summary unavailable, sent raw output) ${pointer}`);
     }
 
     async function dispatch(message, text) {
@@ -63,10 +82,18 @@ function createDmHandler({ allowed, runner, summarize, log = () => {} }) {
         };
 
         log('DM_AGENT_START', 'INFO', `Agent prompt: ${text.slice(0, 500)}`);
+        let result;
         try {
-            const result = await runner.run(userId, text, {
+            result = await runner.run(userId, text, {
                 onProgress: (latest) => { steps.length = 0; steps.push(...latest); refresh(); },
             });
+        } catch (err) {
+            log('DM_AGENT_ERROR', 'ERROR', err.message);
+            await status.edit(`failed ❌ · couldn't reach the agent`).catch(() => {});
+            await message.channel.send(`Couldn't reach the agent: ${err.message}`.slice(0, 2000));
+            return;
+        }
+        try {
             const elapsed = formatElapsed(Date.now() - startedAt);
             if (result.cancelled) {
                 await status.edit(`cancelled 🛑 · ${elapsed}`);
@@ -82,8 +109,8 @@ function createDmHandler({ allowed, runner, summarize, log = () => {} }) {
             log('DM_AGENT_END', result.error ? 'ERROR' : 'INFO',
                 `cancelled=${!!result.cancelled} timedOut=${!!result.timedOut} tools=${result.toolCount} error=${result.error || 'none'}`);
         } catch (err) {
-            log('DM_AGENT_ERROR', 'ERROR', err.message);
-            await message.channel.send(`Couldn't reach the agent: ${err.message}`.slice(0, 2000));
+            log('DM_DELIVERY_ERROR', 'ERROR', err.message);
+            await message.channel.send(`The agent finished, but sending the result failed: ${err.message}`.slice(0, 2000));
         }
     }
 
