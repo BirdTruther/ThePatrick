@@ -278,4 +278,4 @@ Patrick's text AI runs through its own `opencode serve` on `OPENCODE_CHAT_URL`. 
 }
 ```
 
-Run it from an empty working directory with no MCP servers configured. Image generation (`/imagine`) still calls Gemini directly with `GOOGLE_GENERATIVE_AI_API_KEY`.
+Run it from an empty working directory with no MCP servers configured. Image generation (`/imagine`) uses Cloudflare Workers AI: set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env`, with a token limited to Workers AI.

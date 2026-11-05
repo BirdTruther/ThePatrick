@@ -6,10 +6,18 @@ const { generateTextWithFallback } = require('./ai.js');
 const IMAGE_RATE_LIMIT_MAX    = 3;
 const IMAGE_RATE_LIMIT_WINDOW = 60;  // seconds
 const IMAGE_MAX_PROMPT_LENGTH = 500;
-const IMAGE_MODEL             = 'gemini-3.1-flash-image';
+const IMAGE_MODEL             = process.env.IMAGE_MODEL || '@cf/black-forest-labs/flux-1-schnell';
+const IMAGE_STEPS             = 4; // the cost per image scales with this; 8 is the model's maximum
 const IMAGE_RETRY_MAX         = 3;
 const IMAGE_RETRY_BASE_MS     = 2000;
 const RETRYABLE_STATUS_CODES  = new Set([429, 500, 502, 503, 504]);
+
+// Discord needs the right file extension, and the API doesn't state the format.
+function detectImageType(buffer) {
+    if (buffer[0] === 0x89 && buffer[1] === 0x50) return 'image/png';
+    if (buffer.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp';
+    return 'image/jpeg';
+}
 
 // ===== RATE LIMIT STORE =====
 // Map<userId, { count: number, windowStart: number }>
@@ -91,7 +99,7 @@ async function enhanceImagePrompt(rawPrompt) {
             messages: [
                 {
                     role: 'system',
-                    content: `You are an expert at writing image generation prompts for Gemini image generation.
+                    content: `You are an expert at writing image generation prompts.
 Take the user's simple request and expand it into a rich, detailed prompt.
 Rules:
 - Add art style, lighting, mood, camera angle if they make sense
@@ -104,7 +112,7 @@ Rules:
         });
         const enhanced = text.trim();
 
-        // If Gemini "enhanced" the prompt into a refusal / content-policy
+        // If the model "enhanced" the prompt into a refusal / content-policy
         // message, don't feed that refusal into the image model. Fall back to
         // the raw prompt. Try to detect refusals generically across phrasing.
         const lower = enhanced.toLowerCase();
@@ -139,7 +147,7 @@ function sleep(ms) {
 }
 
 // ===== CORE IMAGE GENERATION =====
-// Uses GOOGLE_GENERATIVE_AI_API_KEY via the Gemini generateContent REST API.
+// Uses CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN via the Workers AI REST API.
 // This matches the original implementation from the pre-refactor index.js.
 async function generateImage(prompt, userId = 'unknown', options = {}) {
     const { enhance = true, platform = 'discord' } = options;
@@ -162,18 +170,16 @@ async function generateImage(prompt, userId = 'unknown', options = {}) {
     // 3. Optionally enhance the prompt via AI
     const finalPrompt = enhance ? await enhanceImagePrompt(sanitized) : sanitized;
 
-    // 4. Generate via Gemini REST API
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    if (!apiKey) {
-        logSystemEvent('IMAGE_ERROR', 'ERROR', 'image', 'GOOGLE_GENERATIVE_AI_API_KEY is not set');
+    // 4. Generate via Cloudflare Workers AI
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const apiToken  = process.env.CLOUDFLARE_API_TOKEN;
+    if (!accountId || !apiToken) {
+        logSystemEvent('IMAGE_ERROR', 'ERROR', 'image', 'CLOUDFLARE_ACCOUNT_ID or CLOUDFLARE_API_TOKEN is not set');
         return { success: false, error: '🔑 Image generation is not configured. Contact the server admin.' };
     }
 
-    const url  = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${apiKey}`;
-    const body = {
-        contents: [{ parts: [{ text: finalPrompt }] }],
-        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
-    };
+    const url  = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${IMAGE_MODEL}`;
+    const body = { prompt: finalPrompt, steps: IMAGE_STEPS };
 
     let lastError = null;
 
@@ -190,7 +196,7 @@ async function generateImage(prompt, userId = 'unknown', options = {}) {
 
             const res = await fetch(url, {
                 method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
                 body:    JSON.stringify(body),
             });
 
@@ -205,34 +211,10 @@ async function generateImage(prompt, userId = 'unknown', options = {}) {
             }
 
             const data = await res.json();
-            const parts = data?.candidates?.[0]?.content?.parts || [];
-            const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+            if (!data?.result?.image) throw new Error('Workers AI response contained no image');
 
-            if (!imagePart) {
-                // No image came back — figure out why so we can give a useful
-                // error instead of a generic one.
-                const finishReason = data?.candidates?.[0]?.finishReason || '';
-                const safetyProbs = data?.candidates?.[0]?.safetyRatings?.length || 0;
-                const promptFeedback = data?.promptFeedback?.blockReason || '';
-                const candidateText = parts.map(p => p.text || '').join(' ').trim().substring(0, 150);
-
-                // Content policy / safety blocks and Gemini "refusal" text
-                // should produce a clear, helpful message rather than
-                // "no image part".
-                const refusals = /safety|blocklist|blocked|block|violation|not allowed|refus|cannot|unable|couldn't|couldn’t|won't|won’t|policy/i;
-                const refusalMsg = `${finishReason} ${promptFeedback} ${candidateText}`;
-
-                if (refusals.test(refusalMsg)) {
-                    const err = new Error('Content policy: the image model refused to generate this image');
-                    err.isSafety = true;
-                    throw err;
-                }
-
-                throw new Error('Gemini response contained no image part');
-            }
-
-            const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
-            const mimeType = imagePart.inlineData.mimeType;
+            const buffer = Buffer.from(data.result.image, 'base64');
+            const mimeType = detectImageType(buffer);
 
             console.log(`[Image] Success — ${buffer.length} bytes (${mimeType})`);
             logSystemEvent('IMAGE_SUCCESS', 'INFO', 'image', `Image generated for ${userId} — ${buffer.length} bytes`);
