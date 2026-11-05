@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **ThePatrick**
-**Last Updated: September 20, 2026**
+**Last Updated: November 5, 2026**
 
 ---
 
@@ -26,7 +26,8 @@ Message text is stored temporarily in a local SQLite database for **conversation
 
 The Bot stores:
 
-- **Discord usernames** (display name, not user ID) — for conversation memory and command logging
+- **Discord usernames** (display name) — for conversation memory and command logging
+- **Discord user IDs** — with your username, for `/cs2case` totals and the server leaderboard (see Section 2e)
 - **Twitch usernames** — for conversation memory and command logging
 
 The Bot does **not** collect or store email addresses, passwords, payment information, real names, or any other personally identifiable information beyond platform usernames.
@@ -36,7 +37,7 @@ The Bot does **not** collect or store email addresses, passwords, payment inform
 When you send an image to the Bot for analysis:
 
 - Images are downloaded temporarily to process your request
-- Images are passed to Google Gemini AI for analysis
+- Images are passed to Cloudflare Workers AI for analysis
 - Images are **not** permanently stored by the Bot
 - Discord CDN URLs for Bot-generated images may be logged in the command log database for dashboard display
 
@@ -53,6 +54,14 @@ All commands and their responses are logged to a local SQLite database. Logs inc
 
 These logs are stored locally on the server running the Bot. They are accessible to the server administrator via the web dashboard. Logs older than 30 days are automatically purged.
 
+### 2e. CS2 Case Stats
+
+When you use `/cs2case` on Discord, the Bot stores your Discord user ID and username with your totals for that server: cases opened, simulated spending and value, best pull, knife count and knife droughts. These are shown on `/cs2leaderboard` to anyone in that server. Twitch case openings are not stored in these totals.
+
+### 2f. DM Control
+
+Discord accounts on the operator's allowlist can direct message the Bot to run an agent on the server. Messages from those accounts are sent to the agent and its model provider (see Section 4), and the agent's sessions are stored on the server. Direct messages from anyone else are ignored and not processed.
+
 ## 3. How We Use Information
 
 | Data | Purpose | Retention |
@@ -61,17 +70,19 @@ These logs are stored locally on the server running the Bot. They are accessible
 | Long-term facts | Server-wide AI-maintained facts derived from Bot interactions | Retained until updated or removed by the server administrator |
 | Usernames | Display in conversation context and command logs | 7 days (memory), 30 days (logs) |
 | Command inputs/outputs | Dashboard command log display | 30 days, then auto-deleted |
-| Images sent for analysis | Passed to Google Gemini for analysis only | Not stored |
+| Images sent for analysis | Passed to Cloudflare Workers AI for analysis only | Not stored |
 | Generated image URLs | Dashboard display (clickable links) | 30 days with command log |
+| CS2 case stats | `/cs2case` totals and `/cs2leaderboard` | Retained until removed by the server administrator or on request |
 
 ## 4. Data Sharing
 
 The Bot shares limited data with the following third-party services to function:
 
-- **Google Gemini AI** — Message content and images are sent to Google's API to generate AI responses. Google's [Privacy Policy](https://policies.google.com/privacy) and [AI Terms](https://ai.google.dev/terms) apply.
+- **Cloudflare Workers AI** — Message content, images, image prompts, and usernames included in AI prompts are sent to Cloudflare to generate AI responses and images. Cloudflare's [Privacy Policy](https://www.cloudflare.com/privacypolicy/) applies.
+- **OpenCode** — Messages from allowlisted DM control accounts, and what the agent reads on the server to answer them, are sent through OpenCode to its model provider.
 - **Tarkov.dev** — Item names/queries are sent for price/data lookups. No personal data is transmitted.
 - **Steam Web API** — Steam usernames or SteamID64s submitted via `cs2stats` commands are sent to Valve's API. Valve's [Privacy Policy](https://store.steampowered.com/privacy_agreement/) applies.
-- **CSFloat API** — CS2 inspect links submitted via `cs2float` commands are sent to CSFloat's API.
+- **CSGO-API (GitHub) and CSGOTrader** — The Bot downloads CS2 case, skin and price data. No personal data is sent.
 - **meme-api.com** — No personal data is sent; the Bot simply fetches a random meme.
 
 We do **not** sell, rent, or share your data with advertisers or data brokers.
@@ -89,6 +100,7 @@ We do **not** sell, rent, or share your data with advertisers or data brokers.
 - **Long-term facts:** The Bot may retain up to 25 short, AI-generated facts for the server. Facts are built from Bot interactions, can also be entered by a server administrator, and remain until updated or removed by the server administrator.
 - **Command logs:** Logs are retained for up to 30 days and can be manually cleared via the dashboard (`POST /api/bot/logs/clear`).
 - **Images:** Not retained. Processed in-memory only.
+- **CS2 case stats:** Kept until removed by the server administrator or on request.
 
 ## 7. Your Rights
 

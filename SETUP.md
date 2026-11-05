@@ -52,7 +52,6 @@ Then fill in your values:
 |---|---|---|
 | `DISCORD_TOKEN` | ✅ | [Developer Portal](https://discord.com/developers/applications) → Bot → Token |
 | `DISCORD_CLIENT_ID` | ✅ | Developer Portal → General Information → Application ID |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | ✅ | [aistudio.google.com](https://aistudio.google.com) |
 | `TWITCH_BOT_USERNAME` | ✅ | Your Twitch bot account username |
 | `TWITCH_OAUTH_TOKEN` | ✅ | [twitchapps.com/tmi](https://twitchapps.com/tmi) |
 | `TWITCH_CHANNEL` | ✅ | Your Twitch channel name (no `#`) |

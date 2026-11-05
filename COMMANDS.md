@@ -53,7 +53,7 @@ Music uses `yt-dlp` + `ffmpeg` — no API key required.
 | Command | Description | Args |
 |---|---|---|
 | `/ask` | Ask the AI a question | `question` |
-| `/imagine` | Generate an AI image with Gemini | `prompt` |
+| `/imagine` | Generate an AI image with Cloudflare Workers AI | `prompt` |
 | `/persona` | Switch the bot's personality | `name` |
 | `/personas` | List all available personas | — |
 | `/meme` | Fetch a random meme | — |

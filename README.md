@@ -42,6 +42,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 | Dashboard | Express + vanilla HTML |
 | Music | `yt-dlp` + `ffmpeg` (system binaries) |
 | Twitch | `tmi.js` |
+| CS2 data | [CSGO-API](https://github.com/ByMykel/CSGO-API) for cases and skins, [CSGOTrader](https://prices.csgotrader.app/) for Steam prices |
 
 ---
 
@@ -87,7 +88,7 @@ public/
 
 ## Free AI Limits
 
-Chat, photos, memory updates and `/imagine` share Cloudflare's free allowance of 10,000 neurons a day, which resets at 00:00 UTC. Rough estimates for what that buys, if all of it goes to one thing:
+Chat, photos, memory updates, Patrick's `/cs2case` reactions and `/imagine` share Cloudflare's free allowance of 10,000 neurons a day, which resets at 00:00 UTC. Rough estimates for what that buys, if all of it goes to one thing:
 
 | Use | Cost | Per day |
 |---|---|---|
@@ -102,8 +103,12 @@ A longer conversation context costs more per message.
 
 **November 2026**
 
+- **New `/cs2case`** — Opens real cases with no case names or prices to look up, and the list and prices update daily. Adds a reveal, skin pictures, wear and StatTrak, profit and loss, open-another buttons, Patrick's reactions to big moments, and `/cs2leaderboard`.
+- **Removed CS2 lookups** — `/cs2price`, `/cs2float` and `/cs2map` are gone. `/cs2case` and `/cs2stats` remain.
+- **Dependency cleanup** — Added Dependabot security updates, removed the unused `ai`, `@ai-sdk/google` and `replicate` packages, and cleared the `npm audit` findings. `tar` is held at a fixed version with an override because `@discordjs/opus` still asks for an older one.
 - **DM control channel** — Added DM routing with an allowlist, the OpenCode agent with continuing sessions, and the read-only MCP server. Long results arrive as a summary plus `agent-output.txt`. Discord DMs also needed `Partials.Channel` turned on, and the server message handlers now skip DMs.
 - **Moved off Gemini** — Chat, photos and image generation now run on Cloudflare Workers AI, so Gemini prepay isn't needed.
+- **Updated legal pages** — The privacy policy and terms now cover Cloudflare, OpenCode and case stats.
 - **Fixed file uploads** — Attachments hung because of a `FormData` mismatch between discord.js's `undici` and Node 20. The REST client now uses Node's global `fetch`.
 
 ---
