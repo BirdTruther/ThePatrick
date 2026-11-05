@@ -23,7 +23,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 - **Tarkov** — Item prices, ammo rankings, trader timers, map/boss info, player stats.
 - **Tarkov Allergies** — Roleplay allergy tracking; log and compare what members are allergic to.
 - **Hate List** — Admin-managed roleplay roast list; the bot tags and roasts listed users with AI-generated lines, unless roast pings are toggled off. Any listed user can self-opt-out with `/hate remove-me`.
-- **CS2** — Skin prices, float values, player stats, map callouts, case simulator.
+- **CS2** — Player stats and a case simulator.
 - **Music** — YouTube voice playback via `yt-dlp` + `ffmpeg`. No API key required.
 - **Twitch** — Connects to Twitch IRC and relays messages to Discord.
 - **Dashboard** — Live web UI at `http://localhost:3001` for logs, persona switching, hate list (with a roast-pings toggle), long-term memory management (add/pin/edit/delete facts), and Cultist tracking.

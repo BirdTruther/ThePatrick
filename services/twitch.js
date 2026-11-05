@@ -4,7 +4,7 @@ const { addToMemory } = require('../memory.js');
 const { logCommand, logSystemEvent } = require('../logger.js');
 const { getAIResponse, isWildRequest, getWildRequestResponse } = require('./ai.js');
 const { getTarkovPrice, getBestAmmo, getTraderResets, getMapInfo, getPlayerStats } = require('../commands/tarkov.js');
-const { getCS2SkinPrice, getCS2Float, getCS2PlayerStats, getCS2MapInfo, simulateCS2Case } = require('../commands/cs2.js');
+const { getCS2PlayerStats, simulateCS2Case } = require('../commands/cs2.js');
 
 // ===== CONFIG =====
 const TWITCH_CHAR_LIMIT     = 490;
@@ -133,32 +133,11 @@ twitchClient.on('message', async (channel, tags, message, self) => {
     }
 
     // --- CS2 commands ---
-    if (lowerMessage.startsWith('!cs2price ')) {
-        const skinName = message.substring(10).trim();
-        const result = await getCS2SkinPrice(skinName);
-        await sendTwitchChunked(channel, result);
-        logCommand('twitch', tags.username, '!cs2price', skinName, result);
-        return;
-    }
-    if (lowerMessage.startsWith('!cs2float ')) {
-        const inspectLink = message.substring(10).trim();
-        const result = await getCS2Float(inspectLink);
-        await sendTwitchChunked(channel, result);
-        logCommand('twitch', tags.username, '!cs2float', inspectLink.substring(0, 60), result);
-        return;
-    }
     if (lowerMessage.startsWith('!cs2stats ')) {
         const steamInput = message.substring(10).trim();
         const result = await getCS2PlayerStats(steamInput);
         await sendTwitchChunked(channel, result);
         logCommand('twitch', tags.username, '!cs2stats', steamInput, result);
-        return;
-    }
-    if (lowerMessage.startsWith('!cs2map ')) {
-        const mapInput = message.substring(8).trim();
-        const result = getCS2MapInfo(mapInput);
-        await sendTwitchChunked(channel, result);
-        logCommand('twitch', tags.username, '!cs2map', mapInput, result);
         return;
     }
     if (lowerMessage.startsWith('!cs2case ')) {

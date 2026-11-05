@@ -24,13 +24,10 @@ appear everywhere.
 
 | Command | Description | Args |
 |---|---|---|
-| `/cs2price` | Current Steam Market skin price | `skin` |
-| `/cs2float` | Float value + pattern seed from inspect link | `link` |
 | `/cs2stats` | All-time player stats (public profile required) | `steam` |
-| `/cs2map` | Competitive callouts for active duty maps | `map` |
 | `/cs2case` | Case opening simulator with real Valve odds | `case`, `count`, `cost` |
 
-> `/cs2float` requires `CSFLOAT_API_KEY`. `/cs2stats` requires `STEAM_API_KEY`. `/cs2price` requires `CSGOSKINS_API_KEY`.
+> `/cs2stats` requires `STEAM_API_KEY`.
 
 ---
 

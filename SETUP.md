@@ -58,8 +58,6 @@ Then fill in your values:
 | `TWITCH_CHANNEL` | ✅ | Your Twitch channel name (no `#`) |
 | `EFT_API_KEY` | Optional | [eft-api.tech](https://eft-api.tech) — required for `/player` |
 | `STEAM_API_KEY` | Optional | [steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey) — required for `/cs2stats` |
-| `CSGOSKINS_API_KEY` | Optional | Required for `/cs2price` |
-| `CSFLOAT_API_KEY` | Optional | [csfloat.com](https://csfloat.com) — required for `/cs2float` |
 
 ### 5. Start
 
@@ -208,7 +206,6 @@ sudo systemctl restart discordbot
 | Hate ping window | 4 per 10 min, min 45s gap | `hate-manager.js` → `RATE_WINDOW_MS` / `MAX_PINGS_PER_WINDOW` / `MIN_GAP_MS` |
 | CS2 case key cost | $2.49 | `commands/cs2.js` → `CONFIG.CS2_KEY_COST_USD` |
 | CS2 case max opens | 100 | `commands/cs2.js` → `CONFIG.CS2_CASE_MAX_OPENS` |
-| CS2 price cache TTL | 30 min | `commands/cs2.js` → `CONFIG.CS2_PRICE_CACHE_TTL_MS` |
 | Presence rotation interval | 5 min | `index.js` → `CONFIG.PRESENCE_ROTATE_MS` |
 
 ### Tarkov Time
