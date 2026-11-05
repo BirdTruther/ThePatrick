@@ -118,6 +118,10 @@ const discordClient = new Client({
     partials: [Partials.Channel],
     rest: {
         timeout: CONFIG.REST_TIMEOUT_MS,
+        // The undici 7 override in package.json doesn't recognize Node 20's global
+        // FormData, so discord.js's default request method hangs on every file
+        // upload. Node's own fetch handles it.
+        makeRequest: fetch,
     },
 });
 

@@ -85,10 +85,32 @@ test('long output falls back to raw text when the summary fails', async () => {
         reply: async () => ({ edit: async () => {} }),
         channel: { send: async (text) => { calls.sends.push(text); } },
     });
-    assert.ok(calls.sends.length >= 2);
-    assert.ok(calls.sends.every(text => typeof text === 'string' && text.length <= 2000));
-    assert.strictEqual(calls.sends.slice(0, -1).join(''), 'z'.repeat(4000));
-    assert.match(calls.sends.at(-1), /summary unavailable/);
+    assert.strictEqual(calls.sends.length, 1);
+    const [sent] = calls.sends;
+    assert.ok(sent.content.length <= 2000);
+    assert.match(sent.content, /summary unavailable/);
+    assert.strictEqual(sent.files.length, 1);
+});
+
+test('long output sends the summary with the full output attached', async () => {
+    const sends = [];
+    const handler = createDmHandler({
+        allowed: parseAllowlist(OWNER),
+        runner: {
+            status: () => null,
+            run: async () => ({ text: 'z'.repeat(4000), toolCount: 1 }),
+        },
+        summarize: async () => 'short summary',
+    });
+    await handler({
+        guildId: null,
+        author: { id: OWNER, bot: false },
+        content: 'long job',
+        reply: async () => ({ edit: async () => {} }),
+        channel: { send: async (payload) => { sends.push(payload); } },
+    });
+    assert.strictEqual(sends[0].content, 'short summary');
+    assert.strictEqual(sends[0].files[0].attachment.length, 4000);
 });
 
 test('empty allowlist allows nobody', () => {

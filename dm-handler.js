@@ -4,31 +4,14 @@
 // index.js. Anyone not on the allowlist gets total silence, so the bot never
 // advertises that this exists.
 
-const fs = require('fs');
-const path = require('path');
-const { Events } = require('discord.js');
+const { AttachmentBuilder, Events } = require('discord.js');
 
 const PROGRESS_EDIT_MS = 5000;
 const VERBATIM_LIMIT = 1500; // short answers are sent as written, not summarized
 const RAW_SUMMARY_LIMIT = 40000;
-const RAW_CHUNK_LIMIT = 3;
-const OUTPUT_DIR = path.join(__dirname, 'data', 'dm-output'); // gitignored
 
 function parseAllowlist(raw) {
     return new Set(String(raw || '').split(',').map(s => s.trim()).filter(Boolean));
-}
-
-// Keeps only the latest long output per user, so this can't grow without bound.
-function saveOutput(userId, text) {
-    try {
-        fs.mkdirSync(OUTPUT_DIR, { recursive: true, mode: 0o700 });
-        const file = path.join(OUTPUT_DIR, `last-${userId}.txt`);
-        fs.writeFileSync(file, text, { mode: 0o600 });
-        return file;
-    } catch (err) {
-        console.error('[DM HANDLER] Could not save output:', err.message);
-        return null;
-    }
 }
 
 function formatElapsed(ms) {
@@ -50,19 +33,17 @@ function createDmHandler({ allowed, runner, summarize, log = () => {} }) {
             await message.channel.send(text);
             return;
         }
-        const savedTo = saveOutput(message.author.id, text);
-        const pointer = savedTo ? `Full output on the server: \`${savedTo}\`` : 'Full output could not be saved.';
+        let content;
         try {
-            const summary = await summarize(text.slice(0, RAW_SUMMARY_LIMIT));
-            await message.channel.send(`${summary.slice(0, 1800)}\n\n${pointer}`);
-            return;
+            content = (await summarize(text.slice(0, RAW_SUMMARY_LIMIT))).slice(0, 2000);
         } catch (err) {
             log('DM_SUMMARY_ERROR', 'WARNING', `Summary failed: ${err.message}`);
+            content = `${text.slice(0, VERBATIM_LIMIT)}…\n\n(summary unavailable, full output attached)`;
         }
-        // No summary available, so send the raw text rather than nothing.
-        const chunks = text.match(/[\s\S]{1,1900}/g).slice(0, RAW_CHUNK_LIMIT);
-        for (const chunk of chunks) await message.channel.send(chunk);
-        await message.channel.send(`(summary unavailable, sent raw output) ${pointer}`);
+        await message.channel.send({
+            content,
+            files: [new AttachmentBuilder(Buffer.from(text, 'utf8'), { name: 'agent-output.txt' })],
+        });
     }
 
     async function dispatch(message, text) {
