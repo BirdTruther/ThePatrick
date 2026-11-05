@@ -4,7 +4,7 @@
 // voice channels and messages alone so nothing happens twice, then takes over as
 // soon as Maki is removed. Roles are safe to set twice, so those always run.
 
-const { ChannelType, Events, Partials } = require('discord.js');
+const { ChannelType, Events, OverwriteType, Partials } = require('discord.js');
 
 const MAKI_USER_ID = '563434444321587202';
 const RECENT_JOIN_MS = 7 * 24 * 60 * 60 * 1000;
@@ -166,7 +166,7 @@ function createGuildAutomation({ config = GUILD_CONFIG, store, log = () => {}, n
             parent: settings.voiceCategoryId,
             bitrate: TEMP_VOICE_BITRATE,
             userLimit: TEMP_VOICE_LIMIT,
-            permissionOverwrites: [...inherited, { id: member.id, allow: TEMP_VOICE_OWNER_ALLOW }],
+            permissionOverwrites: [...inherited, { id: member.id, type: OverwriteType.Member, allow: TEMP_VOICE_OWNER_ALLOW }],
             reason: 'Temporary voice channel',
         });
         const tracked = trackedVoiceChannels(guild.id);

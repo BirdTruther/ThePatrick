@@ -226,7 +226,7 @@ test('joining the lobby makes a channel, and leaving it empty deletes it', async
     assert.strictEqual(channel.options.bitrate, 64000);
     assert.strictEqual(channel.options.parent, 'voice');
     assert.strictEqual(channel.options.permissionOverwrites[0].id, 'everyone');
-    assert.deepStrictEqual(channel.options.permissionOverwrites[1], { id: 'owner', allow: 285212688n });
+    assert.deepStrictEqual(channel.options.permissionOverwrites[1], { id: 'owner', type: 1, allow: 285212688n });
     assert.deepStrictEqual(saved.g1, [channel.id]);
 
     channel.members.set('friend', {});
