@@ -2,7 +2,7 @@
 // Discord + Twitch Multi-Platform Bot with AI, Tarkov & CS2 Integration
 
 // ===== DEPENDENCIES =====
-const { Client, Events, GatewayIntentBits, AttachmentBuilder, REST, Routes, ActivityType } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Partials, AttachmentBuilder, REST, Routes, ActivityType } = require('discord.js');
 require('dotenv').config();
 
 // Core modules
@@ -10,6 +10,7 @@ const { addToMemory, getContextFacts } = require('./memory.js');
 const { logCommand, logSystemEvent, runWithLogContext } = require('./logger.js');
 const { getSetting, setSetting } = require('./database.js');
 const { musicSlashCommandDefs, handleMusicInteraction } = require('./music.js');
+const { registerDmHandler } = require('./dm-handler.js');
 const { isHated, getHatedUserIds, getHateChannelId, buildHateJab, buildCallout, canPing, isOnPingCooldown } = require('./hate-manager.js');
 
 // Services
@@ -113,6 +114,8 @@ const discordClient = new Client({
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.DirectMessages,
     ],
+    // Discord does not cache DM channels, so DM events need this partial to fire.
+    partials: [Partials.Channel],
     rest: {
         timeout: CONFIG.REST_TIMEOUT_MS,
     },
@@ -273,6 +276,7 @@ function maybeRandomCallout(userId, username, channel, guildId = null) {
 // Reacts when a hated user chats in general (no mention/reply needed). Menions
 // and replies are skipped here because they already get an augmented AI reply.
 discordClient.on(Events.MessageCreate, (message) => runWithLogContext({ guildId: message.guildId }, () => {
+    if (!message.guildId) return; // DMs belong to dm-handler.js
     if (message.author.bot) return;
     if (message.mentions.has(discordClient.user)) return;
     if (message.reference) return;
@@ -356,6 +360,7 @@ function logMessageShape(message, username) {
 
 // ===== DISCORD MESSAGE HANDLER =====
 discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ guildId: message.guildId }, async () => {
+    if (!message.guildId) return; // DMs belong to dm-handler.js
     if (message.author.bot) return;
     if (message.reference)  return;
 
@@ -421,6 +426,7 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
 
 // ===== DISCORD REPLY HANDLER =====
 discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ guildId: message.guildId }, async () => {
+    if (!message.guildId) return; // DMs belong to dm-handler.js
     if (message.author.bot)  return;
     if (!message.reference)  return;
 
@@ -462,6 +468,9 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
     await safeDiscordReply(message, response);
     logCommand('discord', username, 'reply', userMessage, response);
 }));
+
+// ===== DM CONTROL CHANNEL =====
+registerDmHandler(discordClient);
 
 // ===== LOGIN =====
 discordClient.login(process.env.DISCORD_TOKEN)
