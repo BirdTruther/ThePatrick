@@ -34,7 +34,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 |---|---|
 | Runtime | Node.js ≥ 20.18.1 |
 | Discord | discord.js 14 + @discordjs/voice 0.19.2 |
-| AI | Google Gemini via `@ai-sdk/google` (text model set by `AI_PRIMARY_MODEL`, default `gemini-3.1-flash-lite`; images `gemini-3.1-flash-image`) |
+| AI | Cloudflare Workers AI: Llama 4 Scout for chat and photos, FLUX schnell for images |
 | Database | SQLite via `better-sqlite3` |
 | Dashboard | Express + vanilla HTML |
 | Music | `yt-dlp` + `ffmpeg` (system binaries) |
@@ -64,8 +64,8 @@ commands/
   allergies.js              # Tarkov roleplay allergy commands
   hate.js                   # /hate add|remove|remove-me|list|channel
 services/
-  ai.js                     # Text generation + vision, through opencode-chat.js
-  opencode-chat.js          # Client for the no-tools OpenCode chat server
+  ai.js                     # Text generation + vision, through cloudflare-chat.js
+  cloudflare-chat.js        # Workers AI chat client
   image.js                  # Cloudflare Workers AI image generation + rate limiting
   twitch.js                 # Twitch IRC — self-initializing on require
 public/

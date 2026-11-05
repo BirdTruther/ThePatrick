@@ -267,15 +267,6 @@ DM commands: `!cancel` stops the run, `!status` shows what is running, `!new` st
 
 Tests: `node --test test/`
 
-## Chat backend
+## AI backend
 
-Patrick's text AI runs through its own `opencode serve` on `OPENCODE_CHAT_URL`. Anyone in a server can reach it with their messages, so **never point it at the DM agent's server**. Give it an `OPENCODE_CONFIG` with:
-
-```json
-{
-  "permission": { "*": "deny" },
-  "agent": { "patrick-chat": { "mode": "primary", "prompt": "Follow the system instructions you are given. You have no tools. Reply only with the message text.", "permission": { "*": "deny" } } }
-}
-```
-
-Run it from an empty working directory with no MCP servers configured. Image generation (`/imagine`) uses Cloudflare Workers AI: set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env`, with a token limited to Workers AI.
+Chat, photo understanding and `/imagine` all run on Cloudflare Workers AI. Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env`, with a token limited to Workers AI. The free plan's daily allowance is shared across all of them and resets at midnight UTC. Paid-only models fail on a free account.
