@@ -149,22 +149,14 @@ function registerDmHandler(client) {
     }
 
     const { getSetting, setSetting } = require('./database.js');
-    const { generateTextWithFallback } = require('./services/ai.js');
     const { createRunner } = require('./dm-runner.js');
 
+    const runner = createRunner({ getSetting, setSetting });
     const handler = createDmHandler({
         allowed,
-        runner: createRunner({ getSetting, setSetting }),
+        runner,
         log: (event, level, text) => logSystemEvent(event, level, 'discord', text),
-        summarize: async (text) => {
-            const { text: summary } = await generateTextWithFallback({
-                system: 'Summarize this server-admin agent output for its owner reading on a phone. '
-                    + 'Plain and factual, under 1500 characters. Keep exact names, numbers, paths and errors. '
-                    + 'Say plainly if something failed. No persona, no jokes.',
-                prompt: text,
-            });
-            return summary;
-        },
+        summarize: (text) => runner.summarize(text),
     });
     client.on(Events.MessageCreate, handler);
     logSystemEvent('DM_CONTROL', 'INFO', 'discord', `DM control enabled for ${allowed.size} user(s)`);
