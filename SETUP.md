@@ -266,3 +266,16 @@ Lets allowlisted Discord users DM Patrick to drive an OpenCode agent on the serv
 DM commands: `!cancel` stops the run, `!status` shows what is running, `!new` starts a fresh session. Anything else goes to the agent, continuing the last session. Runs stop after `DM_AGENT_TIMEOUT_MS` (10 minutes by default).
 
 Tests: `node --test test/`
+
+## Chat backend
+
+Patrick's text AI runs through its own `opencode serve` on `OPENCODE_CHAT_URL`. Anyone in a server can reach it with their messages, so **never point it at the DM agent's server**. Give it an `OPENCODE_CONFIG` with:
+
+```json
+{
+  "permission": { "*": "deny" },
+  "agent": { "patrick-chat": { "mode": "primary", "prompt": "Follow the system instructions you are given. You have no tools. Reply only with the message text.", "permission": { "*": "deny" } } }
+}
+```
+
+Run it from an empty working directory with no MCP servers configured. Image generation (`/imagine`) still calls Gemini directly with `GOOGLE_GENERATIVE_AI_API_KEY`.
