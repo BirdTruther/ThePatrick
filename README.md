@@ -23,7 +23,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 - **Tarkov** — Item prices, ammo rankings, trader timers, map/boss info, player stats.
 - **Tarkov Allergies** — Roleplay allergy tracking; log and compare what members are allergic to.
 - **Hate List** — Admin-managed roleplay roast list; the bot tags and roasts listed users with AI-generated lines, unless roast pings are toggled off. Any listed user can self-opt-out with `/hate remove-me`.
-- **CS2** — Player stats and a case simulator.
+- **CS2** — Player stats and a case simulator with real cases, skin pictures, wear, Steam prices and a server leaderboard. The case list and prices update themselves daily.
 - **Music** — YouTube voice playback via `yt-dlp` + `ffmpeg`. No API key required.
 - **Twitch** — Connects to Twitch IRC and relays messages to Discord.
 - **Dashboard** — Live web UI at `http://localhost:3001` for logs, persona switching, hate list (with a roast-pings toggle), long-term memory management (add/pin/edit/delete facts), and Cultist tracking.
@@ -67,13 +67,16 @@ test/                       # Unit tests — run with: node --test test/
 commands/
   utility.js                # /ask, /imagine, /meme, /code, /persona, /personas
   admin.js                  # /pickplayers
-  cs2.js                    # All CS2 commands
+  cs2.js                    # /cs2stats
+  cs2-case.js               # /cs2case and /cs2leaderboard
   tarkov.js                 # All Tarkov commands
   allergies.js              # Tarkov roleplay allergy commands
   hate.js                   # /hate add|remove|remove-me|list|channel
 services/
   ai.js                     # Text generation + vision, through cloudflare-chat.js
   cloudflare-chat.js        # Workers AI chat client
+  cs2-catalog.js            # Daily case, skin and price data
+  cs2-case.js               # Case rolls and per-server totals
   image.js                  # Cloudflare Workers AI image generation + rate limiting
   twitch.js                 # Twitch IRC — self-initializing on require
 public/

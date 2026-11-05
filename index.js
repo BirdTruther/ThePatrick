@@ -23,6 +23,8 @@ require('./services/twitch.js'); // self-initializing — connects on require
 const utilityCommands = require('./commands/utility.js');
 const adminCommands   = require('./commands/admin.js');
 const cs2Commands     = require('./commands/cs2.js');
+const cs2CaseCommands = require('./commands/cs2-case.js');
+const { startCatalogRefresh } = require('./services/cs2-catalog.js');
 const tarkovCommands  = require('./commands/tarkov.js');
 const allergyCommands = require('./commands/allergies.js');
 const hateCommands    = require('./commands/hate.js');
@@ -97,6 +99,7 @@ const allCommands = {
     ...utilityCommands.commands,
     ...adminCommands.commands,
     ...cs2Commands.commands,
+    ...cs2CaseCommands.commands,
     ...tarkovCommands.commands,
     ...allergyCommands.commands,
     ...hateCommands.commands,
@@ -129,6 +132,7 @@ const discordClient = new Client({
 discordClient.once(Events.ClientReady, async (client) => {
     logSystemEvent('DISCORD_READY', 'INFO', 'discord', `✅ Logged in as ${client.user.tag}`);
     console.log(`✅ Discord ready: ${client.user.tag}`);
+    startCatalogRefresh();
 
     // Register slash commands
     try {
@@ -200,6 +204,14 @@ discordClient.once(Events.ClientReady, async (client) => {
 
 // ===== SLASH COMMAND HANDLER =====
 discordClient.on(Events.InteractionCreate, async (interaction) => runWithLogContext({ guildId: interaction.guildId }, async () => {
+    try {
+        if (await cs2CaseCommands.handleCaseInteraction(interaction)) return;
+    } catch (err) {
+        console.error('[CS2 CASE ERROR]', err);
+        logSystemEvent('CS2_ERROR', 'ERROR', 'discord', `Case interaction failed: ${err.message}`);
+        return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const { commandName } = interaction;

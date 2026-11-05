@@ -25,7 +25,8 @@ appear everywhere.
 | Command | Description | Args |
 |---|---|---|
 | `/cs2stats` | All-time player stats (public profile required) | `steam` |
-| `/cs2case` | Case opening simulator with real Valve odds | `case`, `count`, `cost` |
+| `/cs2case` | Opens real cases with skin pictures, wear, StatTrak and Steam prices. Pick from the list or leave blank for a random one | `case` (optional), `count` (optional, up to 100) |
+| `/cs2leaderboard` | This server's biggest pull, profit, losses, most opened and longest knife drought | |
 
 > `/cs2stats` requires `STEAM_API_KEY`.
 

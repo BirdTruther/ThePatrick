@@ -204,8 +204,8 @@ sudo systemctl restart discordbot
 | Long-term fact max length | 140 chars | `memory.js` → `FACT_MAX_LEN` |
 | Recent context messages | 8 | `memory.js` → `CONFIG.MAX_CONTEXT_MESSAGES` |
 | Hate ping window | 4 per 10 min, min 45s gap | `hate-manager.js` → `RATE_WINDOW_MS` / `MAX_PINGS_PER_WINDOW` / `MIN_GAP_MS` |
-| CS2 case key cost | $2.49 | `commands/cs2.js` → `CONFIG.CS2_KEY_COST_USD` |
-| CS2 case max opens | 100 | `commands/cs2.js` → `CONFIG.CS2_CASE_MAX_OPENS` |
+| CS2 case key cost | $2.49 | `services/cs2-case.js` → `KEY_COST_USD` |
+| CS2 case max opens | 100 | `services/cs2-case.js` → `MAX_OPENS` |
 | Presence rotation interval | 5 min | `index.js` → `CONFIG.PRESENCE_ROTATE_MS` |
 
 ### Tarkov Time

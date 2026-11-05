@@ -325,9 +325,36 @@ ${factsBlock}`;
     }
 }
 
+// ===== CS2 CASE ROAST =====
+// Reacts to a big case-opening moment. Returns null on failure, since the result
+// is already on screen and this is only a bonus line.
+
+async function generateCaseRoast(username, { caseName, opened, best, net }, guildId = null) {
+    const persona = getCurrentPersona(guildId);
+    const prompt = `${persona.systemPrompt}
+
+**SPECIAL SITUATION — CS2 CASE OPENING:**
+${username} just opened ${opened} × ${caseName}. Their best pull was ${best}, and their profit or loss was ${net}.
+React in one short sentence, in character. Use only these facts and don't invent any numbers.`;
+
+    try {
+        const { text } = await generateTextWithFallback({
+            messages: [
+                { role: 'system', content: prompt },
+                { role: 'user', content: `React to ${username}'s case opening.` },
+            ],
+        });
+        return (text || '').trim() || null;
+    } catch (error) {
+        logSystemEvent('CS2_ERROR', 'WARNING', 'discord', `Case roast failed: ${error.message}`);
+        return null;
+    }
+}
+
 // ===== EXPORTS =====
 module.exports = {
     generateTextWithFallback,
+    generateCaseRoast,
     getAIResponse,
     getWildRequestResponse,
     generateHateRoast,

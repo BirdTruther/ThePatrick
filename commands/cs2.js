@@ -1,10 +1,7 @@
 // commands/cs2.js
+// /cs2stats. Case opening lives in cs2-case.js.
 const { SlashCommandBuilder } = require('discord.js');
 const { logCommand, logSystemEvent } = require('../logger.js');
-
-// ===== CONFIG =====
-const CS2_KEY_COST_USD = 2.49;
-const CS2_CASE_MAX_OPENS = 100;
 
 // ===== SERVICE FUNCTIONS =====
 
@@ -70,54 +67,6 @@ async function getCS2PlayerStats(steamInput) {
     }
 }
 
-const CS2_CASE_ODDS = [
-    { tier: '🔵 Mil-Spec',     rarity: 'Blue',   chance: 0.7992 },
-    { tier: '🟣 Restricted',   rarity: 'Purple', chance: 0.1598 },
-    { tier: '🩷 Classified',   rarity: 'Pink',   chance: 0.0320 },
-    { tier: '🔴 Covert',       rarity: 'Red',    chance: 0.0064 },
-    { tier: '🟡 Knife/Gloves', rarity: 'Gold',   chance: 0.0026 },
-];
-const CS2_STATTRAK_CHANCE = 0.10;
-
-function simulateCS2Case(caseName, count, caseCostUSD) {
-    const numCases = Math.min(Math.max(Math.floor(count), 1), CS2_CASE_MAX_OPENS);
-    const caseCost = Math.max(parseFloat(caseCostUSD) || 0, 0);
-    const totalCostPerCase = caseCost + CS2_KEY_COST_USD;
-    const totalCost = (totalCostPerCase * numCases).toFixed(2);
-    const results = { Blue: 0, Purple: 0, Pink: 0, Red: 0, Gold: 0 };
-    let statTrakCount = 0;
-    for (let i = 0; i < numCases; i++) {
-        const roll = Math.random();
-        let cumulative = 0;
-        for (const tier of CS2_CASE_ODDS) {
-            cumulative += tier.chance;
-            if (roll <= cumulative) {
-                results[tier.rarity]++;
-                if (Math.random() <= CS2_STATTRAK_CHANCE) statTrakCount++;
-                break;
-            }
-        }
-    }
-    const outcomeLines = CS2_CASE_ODDS
-        .filter(t => results[t.rarity] > 0)
-        .map(t => `${t.tier}: ${results[t.rarity]}x`)
-        .join(' | ');
-    let flavor = '💀 Rough run — the market is not your friend today.';
-    if (results.Gold > 0)                         flavor = '🎉 YOU HIT A KNIFE/GLOVES! Screenshot that NOW!';
-    else if (results.Red > 0)                     flavor = "🔥 A Covert drop?! That's actually solid.";
-    else if (results.Pink > 0)                    flavor = '😤 A Classified — not bad, not great.';
-    else if (results.Purple >= numCases * 0.3)    flavor = '📦 Mostly Restricted. Could be worse... barely.';
-    return [
-        `📦 **CS2 Case Simulator** — ${caseName} (${numCases} opened)`,
-        `💰 Case: $${caseCost.toFixed(2)} + Key: $${CS2_KEY_COST_USD.toFixed(2)} = **$${totalCostPerCase.toFixed(2)}/open** | Total spent: **$${totalCost}**`,
-        `📊 Results: ${outcomeLines || 'Nothing notable'}`,
-        `🎰 StatTrak drops: ${statTrakCount}`,
-        flavor,
-    ].join('\n');
-}
-
-// ===== SLASH COMMAND DEFINITIONS =====
-
 const commands = {
     cs2stats: {
         data: new SlashCommandBuilder()
@@ -132,24 +81,6 @@ const commands = {
             logCommand('discord', interaction.user.username, '/cs2stats', steam, result);
         }
     },
-
-    cs2case: {
-        data: new SlashCommandBuilder()
-            .setName('cs2case')
-            .setDescription('Simulate CS2 case openings')
-            .addStringOption(o => o.setName('case').setDescription('Case name').setRequired(true))
-            .addIntegerOption(o => o.setName('count').setDescription('Number of cases to open').setRequired(true))
-            .addNumberOption(o => o.setName('cost').setDescription('Case cost in USD').setRequired(true)),
-
-        async execute(interaction) {
-            const caseName = interaction.options.getString('case');
-            const count    = interaction.options.getInteger('count');
-            const cost     = interaction.options.getNumber('cost');
-            const result   = simulateCS2Case(caseName, count, cost);
-            await interaction.editReply(result);
-            logCommand('discord', interaction.user.username, '/cs2case', `${caseName} ${count} ${cost}`, result);
-        }
-    },
 };
 
 // ===== EXPORTS =====
@@ -157,5 +88,4 @@ const commands = {
 module.exports = {
     commands,
     getCS2PlayerStats,
-    simulateCS2Case,
 };

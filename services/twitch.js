@@ -4,7 +4,8 @@ const { addToMemory } = require('../memory.js');
 const { logCommand, logSystemEvent } = require('../logger.js');
 const { getAIResponse, isWildRequest, getWildRequestResponse } = require('./ai.js');
 const { getTarkovPrice, getBestAmmo, getTraderResets, getMapInfo, getPlayerStats } = require('../commands/tarkov.js');
-const { getCS2PlayerStats, simulateCS2Case } = require('../commands/cs2.js');
+const { getCS2PlayerStats } = require('../commands/cs2.js');
+const { openCaseAsText } = require('../commands/cs2-case.js');
 
 // ===== CONFIG =====
 const TWITCH_CHAR_LIMIT     = 490;
@@ -39,19 +40,8 @@ async function sendTwitchChunked(channel, text) {
     if (currentChunk) await sendTwitchMessage(channel, currentChunk.trim());
 }
 
-// ===== CS2 CASE ARGUMENT PARSER =====
 // Kept here because it's only used by the Twitch prefix command
 // where args come in as a raw string (unlike slash commands)
-function parseCS2CaseCommand(args) {
-    const tokens = args.trim().split(/\s+/);
-    if (tokens.length < 3) return null;
-    const cost  = parseFloat(tokens[tokens.length - 1]);
-    const count = parseInt(tokens[tokens.length - 2], 10);
-    if (isNaN(count) || isNaN(cost)) return null;
-    const caseName = tokens.slice(0, tokens.length - 2).join(' ') || 'Unknown Case';
-    return { caseName, count, cost };
-}
-
 // ===== TWITCH CLIENT SETUP =====
 
 const twitchClient = new tmi.Client({
@@ -140,18 +130,11 @@ twitchClient.on('message', async (channel, tags, message, self) => {
         logCommand('twitch', tags.username, '!cs2stats', steamInput, result);
         return;
     }
-    if (lowerMessage.startsWith('!cs2case ')) {
-        const args   = message.substring(9).trim();
-        const parsed = parseCS2CaseCommand(args);
-        if (!parsed) {
-            const usage = 'Usage: !cs2case <case name> <count> <case cost> — e.g. !cs2case Kilowatt 10 1.50';
-            twitchClient.say(channel, usage);
-            logCommand('twitch', tags.username, '!cs2case', args, usage, true);
-        } else {
-            const result = simulateCS2Case(parsed.caseName, parsed.count, parsed.cost);
-            await sendTwitchChunked(channel, result);
-            logCommand('twitch', tags.username, '!cs2case', args, result);
-        }
+    if (lowerMessage === '!cs2case' || lowerMessage.startsWith('!cs2case ')) {
+        const args = message.substring(8).trim();
+        const result = await openCaseAsText(args);
+        await sendTwitchChunked(channel, result);
+        logCommand('twitch', tags.username, '!cs2case', args, result);
         return;
     }
 
