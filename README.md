@@ -24,7 +24,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 - **Tarkov Allergies** — Roleplay allergy tracking; log and compare what members are allergic to.
 - **Hate List** — Admin-managed roleplay roast list; the bot tags and roasts listed users with AI-generated lines, unless roast pings are toggled off. Any listed user can self-opt-out with `/hate remove-me`.
 - **CS2** — Player stats and a case simulator with real cases, skin pictures, wear, Steam prices and a server leaderboard. The case list and prices update themselves daily.
-- **Server automation** — Gives the access role when someone accepts the rules, catching up after any downtime. Handles reaction roles for games and Cultist pings. Also runs temporary voice channels and welcome and leave messages, which stay off while Maki is in the server.
+- **Server automation** — Gives the access role when someone accepts the rules, catching up after any downtime. Handles reaction roles for games and Cultist pings. Also runs temporary voice channels and welcome and leave messages.
 - **Music** — YouTube voice playback via `yt-dlp` + `ffmpeg`. No API key required.
 - **Twitch** — Connects to Twitch IRC and relays messages to Discord.
 - **Dashboard** — Live web UI at `http://localhost:3001` for logs, persona switching, hate list (with a roast-pings toggle), long-term memory management (add/pin/edit/delete facts), and Cultist tracking.
@@ -105,7 +105,7 @@ A longer conversation context costs more per message.
 
 **November 2026**
 
-- **Replacing Maki** — Patrick now gives Beaky Buddy on rule acceptance. Temporary voice channels and welcome and leave messages are ready and switch on when Maki is removed. Game and Cultist reaction roles now run on the existing messages, so nobody has to react again.
+- **Replaced Maki** — Patrick now gives Beaky Buddy on rule acceptance and runs temporary voice channels, welcome and leave messages, and game and Cultist reaction roles on the existing messages. Maki's levels and economy games were dropped.
 - **New `/cs2case`** — Opens real cases with no case names or prices to look up, and the list and prices update daily. Adds a reveal, skin pictures, wear and StatTrak, profit and loss, open-another buttons, Patrick's reactions to big moments, and `/cs2leaderboard`.
 - **Removed CS2 lookups** — `/cs2price`, `/cs2float` and `/cs2map` are gone. `/cs2case` and `/cs2stats` remain.
 - **Dependency cleanup** — Added Dependabot security updates, removed the unused `ai`, `@ai-sdk/google` and `replicate` packages, and cleared the `npm audit` findings. `tar` is held at a fixed version with an override because `@discordjs/opus` still asks for an older one.
