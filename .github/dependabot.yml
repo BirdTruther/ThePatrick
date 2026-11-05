@@ -1,0 +1,9 @@
+# Security updates only: a limit of 0 turns off routine version-update PRs.
+# Security PRs also need "Dependabot security updates" enabled in the repo settings.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
