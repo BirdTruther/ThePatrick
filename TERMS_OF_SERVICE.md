@@ -7,7 +7,7 @@
 
 ## 1. Acceptance of Terms
 
-By adding ThePatrick to your Discord server, accessing it through the Birds Server onboarding process, or continuing to interact with it on Discord or Twitch, you agree to these Terms of Service. If you do not agree, please discontinue use of the Bot. Access to Patrick in the Birds Server may also require completing the server's rules and Makki verification process.
+By adding ThePatrick to your Discord server, accessing it through the Birds Server onboarding process, or continuing to interact with it on Discord or Twitch, you agree to these Terms of Service. If you do not agree, please discontinue use of the Bot. Access to Patrick in the Birds Server may also require agreeing to the server's rules.
 
 ## 2. Description of Service
 

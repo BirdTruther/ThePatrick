@@ -11,6 +11,7 @@ const { logCommand, logSystemEvent, runWithLogContext } = require('./logger.js')
 const { getSetting, setSetting } = require('./database.js');
 const { musicSlashCommandDefs, handleMusicInteraction } = require('./music.js');
 const { registerDmHandler } = require('./dm-handler.js');
+const { registerGuildAutomation, GUILD_AUTOMATION_PARTIALS } = require('./guild-automation.js');
 const { isHated, getHatedUserIds, getHateChannelId, buildHateJab, buildCallout, canPing, isOnPingCooldown } = require('./hate-manager.js');
 
 // Services
@@ -114,11 +115,12 @@ const discordClient = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.DirectMessages,
     ],
     // Discord does not cache DM channels, so DM events need this partial to fire.
-    partials: [Partials.Channel],
+    partials: [Partials.Channel, ...GUILD_AUTOMATION_PARTIALS],
     rest: {
         timeout: CONFIG.REST_TIMEOUT_MS,
         // The undici 7 override in package.json doesn't recognize Node 20's global
@@ -487,6 +489,7 @@ discordClient.on(Events.MessageCreate, async (message) => runWithLogContext({ gu
 
 // ===== DM CONTROL CHANNEL =====
 registerDmHandler(discordClient);
+registerGuildAutomation(discordClient);
 
 // ===== LOGIN =====
 discordClient.login(process.env.DISCORD_TOKEN)
