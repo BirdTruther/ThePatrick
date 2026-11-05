@@ -1,19 +1,15 @@
 // services/ai.js
-const { generateText } = require('ai');
-const { google } = require('@ai-sdk/google');
+const { createChatClient, hasImage } = require('./opencode-chat.js');
 const { addToMemory, getSmartContext, getLongTermFacts, getContextFacts, saveFacts, getLastConsolidatedId, setLastConsolidatedId, getNewMessagesSince, MIN_NEW_MESSAGES, FACT_MAX, SHARED_SCOPE } = require('../memory.js');
 const { logCommand, logSystemEvent } = require('../logger.js');
 const { getCurrentPersona, getPersonaErrorMessage } = require('../persona-manager.js');
 
 // ===== CONFIG =====
-// Override in .env. Changing the model is fully reversible: edit AI_PRIMARY_MODEL
-// and restart — no code change. Verified options (paid, per 1M in/out):
-//   gemini-3.1-flash-lite  $0.25 / $1.50  (newer + cheapest, beats 2.5 Flash)
-//   gemini-2.5-flash       $0.30 / $2.50  (previous default)
-//   gemini-3-flash-preview $0.50 / $3.00
-//   gemini-3.8-flash       $0.75 / $3.75
-const AI_PRIMARY_MODEL  = process.env.AI_PRIMARY_MODEL  || 'gemini-3.1-flash-lite';
-const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL || 'gemini-2.5-flash';
+// Override in .env as provider/model, then restart. Text goes to the primary model.
+// Beam rejects images, so messages with pictures go straight to the fallback.
+const AI_PRIMARY_MODEL  = process.env.AI_PRIMARY_MODEL  || 'opencode-go/beam-free';
+const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL || 'opencode-go/deepseek-v4.1-flash';
+const chatClient = createChatClient();
 
 // The bot needs to know "when" it is. Inject the live date/time into every
 // interactive prompt so it stops answering as if it's stuck in its training data.
@@ -46,25 +42,17 @@ function isWildRequest(messageContent) {
 // ===== CORE AI FUNCTIONS =====
 
 async function generateTextWithFallback(options) {
+    if (hasImage(options)) return chatClient.generate(AI_FALLBACK_MODEL, options);
     try {
-        return await generateText({ ...options, model: google(AI_PRIMARY_MODEL) });
+        return await chatClient.generate(AI_PRIMARY_MODEL, options);
     } catch (primaryErr) {
-        const msg = (primaryErr?.message || '').toLowerCase();
-        const isOverload =
-            msg.includes('high demand')          ||
-            msg.includes('503')                  ||
-            msg.includes('overloaded')           ||
-            msg.includes('529')                  ||
-            msg.includes('temporarily unavailable') ||
-            msg.includes('retry');
-
-        if (!isOverload) throw primaryErr;
-
-        console.warn(`[AI] ${AI_PRIMARY_MODEL} overloaded — falling back to ${AI_FALLBACK_MODEL}`);
+        // Any failure falls back: Beam's free pricing is only for a limited time,
+        // so the primary can disappear rather than just being overloaded.
+        console.warn(`[AI] ${AI_PRIMARY_MODEL} failed — falling back to ${AI_FALLBACK_MODEL}`);
         logSystemEvent('AI_FALLBACK', 'WARNING', 'ai',
-            `Primary model overloaded, falling back to ${AI_FALLBACK_MODEL}: ${primaryErr.message.substring(0, 120)}`
+            `Primary model failed, falling back to ${AI_FALLBACK_MODEL}: ${primaryErr.message.substring(0, 120)}`
         );
-        return await generateText({ ...options, model: google(AI_FALLBACK_MODEL) });
+        return chatClient.generate(AI_FALLBACK_MODEL, options);
     }
 }
 
@@ -230,7 +218,7 @@ IMPORTANT — vary your response structure. Do NOT:
 
         const userContent = [{ type: 'text', text: message }];
         if (images && images.length > 0) {
-            for (const image of images) userContent.push({ type: 'image', image: image.buffer });
+            for (const image of images) userContent.push({ type: 'image', image: image.buffer, mediaType: image.contentType });
         }
 
         const { text } = await generateTextWithFallback({

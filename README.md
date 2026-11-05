@@ -64,7 +64,8 @@ commands/
   allergies.js              # Tarkov roleplay allergy commands
   hate.js                   # /hate add|remove|remove-me|list|channel
 services/
-  ai.js                     # Gemini text generation + vision
+  ai.js                     # Text generation + vision, through opencode-chat.js
+  opencode-chat.js          # Client for the no-tools OpenCode chat server
   image.js                  # Gemini image generation + rate limiting
   twitch.js                 # Twitch IRC — self-initializing on require
 public/
