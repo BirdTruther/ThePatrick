@@ -16,7 +16,9 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 
 ## What It Does
 
-- **AI chat** — Mention the bot or reply to it. Supports text, image understanding, and image generation via Cloudflare Workers AI.
+- **AI chat** — Mention the bot or reply to it. Supports text, image understanding, and image generation via Cloudflare Workers AI, using its free daily allowance.
+- **DM control** — Allowlisted users can DM Patrick to run an OpenCode agent on the server, with progress updates, a summary of the result, and `!cancel`, `!status` and `!new`. Everyone else is silently ignored. See [Self-Hosting](SETUP.md).
+- **Server status tools** — The DM agent gets a read-only MCP server for system, disk, log, bot, Docker, backup and re-encode status.
 - **Long-term memory** — The AI builds one durable server-wide "fact sheet" (names, mains, inside jokes) and references it across channels; also feeds roasts. Hourly, cost-bounded consolidation, with **pinned facts** that survive AI rewrites.
 - **Tarkov** — Item prices, ammo rankings, trader timers, map/boss info, player stats.
 - **Tarkov Allergies** — Roleplay allergy tracking; log and compare what members are allergic to.
@@ -34,7 +36,8 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 |---|---|
 | Runtime | Node.js ≥ 20.18.1 |
 | Discord | discord.js 14 + @discordjs/voice 0.19.2 |
-| AI | Cloudflare Workers AI: Llama 4 Scout for chat and photos, FLUX schnell for images |
+| AI | Cloudflare Workers AI: Llama 4 Scout for chat and photos, Gemma 4 as fallback, FLUX schnell for images |
+| DM agent | `opencode serve` on localhost, with DeepSeek V4.1 Flash through OpenCode Go |
 | Database | SQLite via `better-sqlite3` |
 | Dashboard | Express + vanilla HTML |
 | Music | `yt-dlp` + `ffmpeg` (system binaries) |
@@ -56,6 +59,11 @@ logger.js                   # Structured logging to console + dashboard stream
 personas.js                 # AI personality definitions
 persona-manager.js          # Persona state and switching logic
 hate-manager.js             # Hate list storage, roast pools, ping cooldowns
+dm-handler.js               # DM routing, allowlist, !cancel/!status/!new, result delivery
+dm-runner.js                # OpenCode server client — sessions, permissions, progress, timeout
+mcp/
+  patrick-ops.js            # Read-only MCP server for the DM agent
+test/                       # Unit tests — run with: node --test test/
 commands/
   utility.js                # /ask, /imagine, /meme, /code, /persona, /personas
   admin.js                  # /pickplayers
@@ -71,6 +79,29 @@ services/
 public/
   dashboard.html            # Dashboard frontend
 ```
+
+---
+
+## Free AI Limits
+
+Chat, photos, memory updates and `/imagine` share Cloudflare's free allowance of 10,000 neurons a day, which resets at 00:00 UTC. Rough estimates for what that buys, if all of it goes to one thing:
+
+| Use | Cost | Per day |
+|---|---|---|
+| Chat message | About 80 neurons, measured on 6 test messages | About 125 |
+| 1024×1024 image | Calculated, not measured | About 170 |
+
+A longer conversation context costs more per message.
+
+---
+
+## Recent Changes
+
+**November 2026**
+
+- **DM control channel** — Added DM routing with an allowlist, the OpenCode agent with continuing sessions, and the read-only MCP server. Long results arrive as a summary plus `agent-output.txt`. Discord DMs also needed `Partials.Channel` turned on, and the server message handlers now skip DMs.
+- **Moved off Gemini** — Chat, photos and image generation now run on Cloudflare Workers AI, so Gemini prepay isn't needed.
+- **Fixed file uploads** — Attachments hung because of a `FormData` mismatch between discord.js's `undici` and Node 20. The REST client now uses Node's global `fetch`.
 
 ---
 
