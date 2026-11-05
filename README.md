@@ -109,6 +109,7 @@ A longer conversation context costs more per message.
 
 **November 2026**
 
+- **Server cleanup** — Slash commands now work only in `#bot-commands`, while @mentions still work everywhere. Eight game and ping roles, the old command and game channels and the EPIC RPG and Discohook Utils bots are gone, and Streamcord no longer has Administrator. Patrick posts the rules, quick links and the `#thepatrick-bot` showcase. The work was done by `scripts/server-cleanup.js`, which does a dry run first and saves a snapshot.
 - **Replaced Maki** — Patrick now gives Beaky Buddy on rule acceptance and runs temporary voice channels and welcome and leave messages. Maki's levels and economy games were dropped.
 - **New `/cs2case`** — Opens real cases with no case names or prices to look up, and the list and prices update daily. Adds a reveal, skin pictures, wear and StatTrak, profit and loss, open-another buttons, Patrick's reactions to big moments, and `/cs2leaderboard`.
 - **Removed CS2 lookups** — `/cs2price`, `/cs2float` and `/cs2map` are gone. `/cs2case` and `/cs2stats` remain.

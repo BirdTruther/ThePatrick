@@ -71,8 +71,10 @@ const BIRDS_NEST = {
     },
     roles: { access: '753089673550757938', mod: '719283034200866917', streamBot: '754521998226358354' },
     streamBotUserId: '375805687529209857',
-    // Channels where Maki's own posts get deleted.
-    makiCleanupChannels: ['1243696602959315045', '1026876016083337236', '1359306607300968620', '795560649596862475'],
+    // Channels where Maki's own posts get deleted. Only #rules, where its old rules and role
+    // messages are replaced. Its welcome, level-up and game posts elsewhere are left alone,
+    // because they do no harm and deleting them is slow.
+    makiCleanupChannels: ['795560649596862475'],
 };
 
 // ===== PERMISSION MATH =====

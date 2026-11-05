@@ -19,7 +19,7 @@ const GUILD_CONFIG = {
     // Bird's Nest
     '367470993045848065': {
         accessRoleId: '753089673550757938', // Beaky Buddy
-        rulesMessageId: '1446388699246887095',
+        rulesMessageId: '1567836379881152614', // Patrick's own rules message, which replaced Maki's
         welcomeChannelId: '1243696602959315045',
         voiceLobbyId: '1186505748423905361',
         voiceCategoryId: '367470993871994882',
