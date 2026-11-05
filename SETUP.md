@@ -251,3 +251,18 @@ sudo systemctl restart discordbot
 | `POST` | `/api/export/start` | Start a memorial-message export |
 | `GET` | `/api/export/status/:jobId` | Export job status |
 | `GET` | `/api/export/download/:jobId` | Download completed export |
+
+## DM control channel (optional)
+
+Lets allowlisted Discord users DM Patrick to drive an OpenCode agent on the server. **The agent has full shell access as the service user**, so `DM_ALLOWLIST` is the only thing between a Discord account and the server. Use 2FA on any allowlisted account.
+
+1. Set `DM_ALLOWLIST`, `OPENCODE_SERVER_PASSWORD` and the other `DM_*` values in `.env` (see `.env.example`).
+2. Run `opencode serve --hostname 127.0.0.1 --port 4096` as a service with the same password in its environment. Never bind it beyond localhost.
+3. Point OpenCode at the read-only tools with an `OPENCODE_CONFIG` file containing:
+   ```json
+   { "mcp": { "patrick-ops": { "type": "local", "command": ["node", "/path/to/mcp/patrick-ops.js"], "enabled": true } } }
+   ```
+
+DM commands: `!cancel` stops the run, `!status` shows what is running, `!new` starts a fresh session. Anything else goes to the agent, continuing the last session. Runs stop after `DM_AGENT_TIMEOUT_MS` (10 minutes by default).
+
+Tests: `node --test test/`
