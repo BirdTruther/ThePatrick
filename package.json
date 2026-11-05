@@ -11,21 +11,19 @@
     "dashboard": "node dashboard-server.js"
   },
   "dependencies": {
-    "@ai-sdk/google": "2.0.0",
-    "@discordjs/opus": "0.9.0",
+    "@discordjs/opus": "0.10.0",
     "@discordjs/voice": "0.19.2",
-    "ai": "5.0.60",
     "better-sqlite3": "11.10.0",
     "cors": "2.8.5",
     "discord.js": "14.22.1",
     "dotenv": "17.2.3",
     "express": "4.22.3",
     "graphql-request": "^7.1.2",
-    "replicate": "1.0.1",
     "tmi.js": "1.8.5"
   },
   "overrides": {
-    "undici": "^7.0.0"
+    "undici": "^7.0.0",
+    "tar": "^7.5.22"
   },
   "keywords": [
     "discord",
