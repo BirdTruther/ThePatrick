@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/readme-banner.png" alt="ThePatrick — Discord and Twitch bot for the Birds Server">
+</p>
+
 # ThePatrick
 
 ![Version](https://img.shields.io/github/v/release/BirdTruther/ThePatrick)
@@ -27,7 +31,7 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 - **Server automation** — Gives the access role when someone accepts the rules, catching up after any downtime. Also runs temporary voice channels and welcome and leave messages.
 - **Music** — YouTube voice playback via `yt-dlp` + `ffmpeg`. No API key required.
 - **Twitch** — Connects to Twitch IRC and relays messages to Discord.
-- **Dashboard** — Live web UI at `http://localhost:3001` for logs, persona switching, hate list (with a roast-pings toggle), long-term memory management (add/pin/edit/delete facts), and Cultist tracking.
+- **Dashboard** — Web control panel at `http://127.0.0.1:3001` (loopback by default), behind Discord OAuth sign-in. A "Managing server" picker scopes the controls to a server you administer, and allowlisted owners can manage every server. Covers per-server persona, hate list and roast pings, Cultist alert config, facts with pinning plus an owner-curated shared pool, bot status, command and system logs, and a memorial message exporter that downloads JSON or CSV. Login needs `DISCORD_CLIENT_SECRET`, `DASHBOARD_OAUTH_REDIRECT_URI`, `DASHBOARD_ALLOWED_USER_IDS` and `DASHBOARD_ALLOW_GUILD_ADMINS`; see [Self-Hosting](SETUP.md).
 
 ---
 
@@ -40,7 +44,8 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 | AI | Cloudflare Workers AI: Llama 4 Scout for chat and photos, Gemma 4 as fallback, FLUX schnell for images |
 | DM agent | `opencode serve` on localhost, with DeepSeek V4.1 Flash through OpenCode Go |
 | Database | SQLite via `better-sqlite3` |
-| Dashboard | Express + vanilla HTML |
+| Dashboard | Express 4 + vanilla HTML, served from `public/` |
+| Dashboard auth | Discord OAuth 2.0, sessions stored in SQLite `bot_settings` |
 | Music | `yt-dlp` + `ffmpeg` (system binaries) |
 | Twitch | `tmi.js` |
 | CS2 data | [CSGO-API](https://github.com/ByMykel/CSGO-API) for cases and skins, [CSGOTrader](https://prices.csgotrader.app/) for Steam prices |
@@ -51,12 +56,13 @@ Head to **[birdsserver.cfd](https://birdsserver.cfd/)**. Discord and GitHub cont
 
 ```
 index.js                    # Entry point — Discord client, slash registration, event routing
-dashboard-server.js         # Express API + dashboard frontend
+dashboard-server.js         # Express API + serves public/dashboard.html
+dashboard-auth.js           # Discord OAuth login, sessions, per-guild access checks
 music.js                    # Music slash command handler (ACTIVE)
 music-player.js             # Voice engine — yt-dlp, ffmpeg, DAVE E2EE (ACTIVE)
 music-player.deprecated.js  # Previous rewrite — reference only, not loaded at runtime
-memory.js                   # SQLite conversation context + long-term fact sheet
-database.js                 # SQLite schema, log tables
+memory.js                   # SQLite conversation context + per-server and shared fact sheets
+database.js                 # SQLite schema, settings store, log tables
 logger.js                   # Structured logging to console + dashboard stream
 personas.js                 # AI personality definitions
 persona-manager.js          # Persona state and switching logic
@@ -84,6 +90,7 @@ services/
   cloudflare-chat.js        # Workers AI chat client
   cs2-catalog.js            # Daily case, skin and price data
   cs2-case.js               # Case rolls and per-server totals
+  cultist.js                # Tarkov clock + per-guild cultist alert config
   image.js                  # Cloudflare Workers AI image generation + rate limiting
   twitch.js                 # Twitch IRC — self-initializing on require
 public/

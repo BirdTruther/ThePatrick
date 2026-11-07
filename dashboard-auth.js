@@ -222,24 +222,76 @@ function escapeHtml(str) {
 }
 
 function authErrorPage(message) {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Dashboard login</title>
-<style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-.card{max-width:520px;padding:32px;background:#1e293b;border:1px solid #334155;border-radius:12px;text-align:center}
-h1{font-size:1.25rem;margin:0 0 12px}p{color:#94a3b8;line-height:1.5}a{color:#60a5fa}</style></head>
-<body><div class="card"><h1>ThePatrick Dashboard</h1><p>${escapeHtml(message)}</p>
- <p><a href="/auth/login">Try again</a></p></div></body></html>`;
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>ThePatrick // Dashboard</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:radial-gradient(900px 480px at 50% -10%,rgba(92,186,160,.10) 0,rgba(92,186,160,0) 60%),#181714;color:#f1ede4;line-height:1.55}
+.card{width:100%;max-width:460px;padding:28px;background:#211f1b;border:1px solid #35322b;border-radius:16px;box-shadow:0 30px 70px -30px rgba(0,0,0,.95);text-align:center}
+.mark{width:44px;height:44px;margin:0 auto 16px;display:grid;place-items:center;border-radius:13px;background:#14131a;border:1px solid #35322b}
+.mark img{width:32px;height:32px;display:block}
+h1{margin:0 0 8px;font-size:1.2rem;letter-spacing:-.02em}
+p{margin:0 0 18px;color:#a49d8f;font-size:.92rem}
+a{display:inline-flex;padding:9px 16px;border-radius:10px;background:#5cbaa0;color:#0d1a16;text-decoration:none;font-weight:700;font-size:.88rem}
+a:hover{background:#74cdb4}
+</style></head>
+<body><div class="card">
+<div class="mark"><img src="/logo.png" alt="" width="32" height="32" decoding="async"></div>
+<h1>ThePatrick Dashboard</h1>
+<p>${escapeHtml(message)}</p>
+<a href="/auth/login">Try again</a>
+</div></body></html>`;
 }
 
 function authLandingPage() {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThePatrick // Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>ThePatrick // Dashboard</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
-*{box-sizing:border-box}html{min-height:100%;background:#0a0c10}body{min-height:100vh;margin:0;padding:24px;font-family:'Exo 2',sans-serif;background:#0a0c10;color:#c8d6e5;line-height:1.6;overflow-x:hidden}body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.35;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px)}.shell{width:min(1050px,100%);margin:0 auto;position:relative}.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:10px 0 22px;border-bottom:1px solid rgba(100,180,255,.14)}.brand{font-family:'Share Tech Mono',monospace;color:#00d4ff;letter-spacing:.08em}.brand span{color:#6b7f96}.toplink{color:#6b7f96;font-size:.85rem;text-decoration:none}.toplink:hover{color:#00d4ff}.hero{padding:clamp(48px,9vw,92px) 0 52px;text-align:center;position:relative}.hero:before{content:'';position:absolute;inset:-20% 10% 0;background:radial-gradient(ellipse at top,rgba(0,212,255,.1),transparent 65%);z-index:-1}.eyebrow{font-family:'Share Tech Mono',monospace;color:#00d4ff;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase}.hero h1{margin:16px 0 14px;color:#fff;font-size:clamp(2.1rem,5vw,4.3rem);line-height:1.05}.hero h1 span{color:#00d4ff}.hero p{max-width:650px;margin:0 auto;color:#6b7f96;font-size:1.05rem}.status{display:inline-flex;gap:9px;align-items:center;margin-top:24px;padding:6px 12px;border:1px solid rgba(0,255,136,.3);border-radius:999px;color:#00ff88;background:rgba(0,255,136,.06);font-family:'Share Tech Mono',monospace;font-size:.76rem;letter-spacing:.08em}.dot{width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px #00ff88}.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:32px}.login,.site{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:7px;text-decoration:none;font-weight:700;transition:.18s}.login{background:#00d4ff;color:#061016}.login:hover{background:#33ddff;box-shadow:0 0 22px rgba(0,212,255,.35)}.site{border:1px solid rgba(100,180,255,.25);color:#c8d6e5}.site:hover{border-color:#00d4ff;color:#00d4ff}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-bottom:42px}@media(max-width:760px){body{padding:16px}.topbar{align-items:flex-start}.grid{grid-template-columns:1fr}}.card{padding:22px;background:#0f1218;border:1px solid rgba(100,180,255,.12);border-radius:10px}.card:hover{border-color:rgba(100,180,255,.3)}.icon{font-size:1.55rem;margin-bottom:12px}.card h2{margin:0 0 7px;color:#fff;font-size:1.05rem}.card p{margin:0;color:#6b7f96;font-size:.9rem}.card-kicker{font-family:'Share Tech Mono',monospace;color:#00d4ff;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px}.card-code{display:block;margin-top:14px;color:#00ff88;font: .75rem/1.6 'Share Tech Mono',monospace}.card-cyan{box-shadow:inset 0 2px #00d4ff}.card-green{box-shadow:inset 0 2px #00ff88}.card-purple{box-shadow:inset 0 2px #b06fff}.console{margin:0 auto 42px;background:#080a0d;border:1px solid rgba(0,212,255,.2);border-radius:9px;padding:16px 20px;font-family:'Share Tech Mono',monospace;font-size:.82rem;color:#6b7f96}.console strong{color:#00d4ff;font-weight:400}.console .ok{color:#00ff88}.footer{border-top:1px solid rgba(100,180,255,.1);padding:20px 0;text-align:center;color:#3a4a5a;font-family:'Share Tech Mono',monospace;font-size:.72rem}
-</style></head><body><main class="shell"><nav class="topbar"><div class="brand">BIRDS<span>//</span>PATRICK</div><a class="toplink" href="https://birdsserver.cfd/" target="_blank" rel="noopener">birdsserver.cfd &#8599;</a></nav>
-<section class="hero"><div class="eyebrow">operator console // secure access</div><h1>ThePatrick <span>Dashboard</span></h1><p>Control the bot that talks Tarkov, remembers the important stuff, roasts the deserving, and keeps every server's settings in its own lane.</p><div class="status"><i class="dot"></i> DISCORD AUTHENTICATION REQUIRED</div><div class="actions"><a class="login" href="/auth/login?start=1">&#x1F3AE; Sign in with Discord</a><a class="site" href="https://birdsserver.cfd/" target="_blank" rel="noopener">Explore the Birds Server</a></div></section>
-<div class="console"><strong>$ patrick status</strong><br><span class="ok">[online]</span> multi-server control plane ready<br><span class="ok">[scoped]</span> persona, hate, cultist alerts, and facts<br><span class="ok">[shared]</span> owner-curated memory across servers</div>
-<section class="grid"><article class="card card-cyan"><div class="card-kicker">// GUILD CONTROL</div><div class="icon">&#x1F310;</div><h2>One console. Every server.</h2><p>Pick a server you administer and change its persona, hate list, roast channel, cultist alerts, and music-adjacent chaos without crossing the streams.</p><code class="card-code">scope: guild_id<br>access: manage_server</code></article><article class="card card-green"><div class="card-kicker">// MEMORY LAYER</div><div class="icon">&#x1F9E0;</div><h2>Local facts. Shared recall.</h2><p>Admins manage their own server's facts. The owner can promote the good stuff into shared memory so Patrick carries it everywhere.</p><code class="card-code">local facts: isolated<br>shared facts: curated</code></article><article class="card card-purple"><div class="card-kicker">// OPERATOR ACCESS</div><div class="icon">&#x1F6E1;&#xFE0F;</div><h2>Discord is the keycard.</h2><p>Sign in with Discord. Server admins see their server; the superadmin sees system logs, exports, shared memory, and every connected guild.</p><code class="card-code">oauth2: discord<br>logs: scoped</code></article><article class="card card-cyan"><div class="card-kicker">// BOT PERSONALITY</div><div class="icon">&#x1F3AD;</div><h2>Make Patrick fit the room.</h2><p>One server can choose Nice &amp; Smart while another chooses Aggressive, Sassy, Conspiracy, or Sleepy. Same bot, different vibe.</p><code class="card-code">/persona name:nice<br>fallback: global</code></article><article class="card card-green"><div class="card-kicker">// ALERT PIPELINE</div><div class="icon">&#x1F319;</div><h2>Cultists on schedule.</h2><p>Your Tarkov-time monitor posts active and despawn alerts into the channel and optional role you configure for each server.</p><code class="card-code">window: 22:00–07:00<br>clock: 7x Tarkov time</code></article><article class="card card-purple"><div class="card-kicker">// COMMAND SURFACE</div><div class="icon">&#x26A1;</div><h2>Useful commands, actual outputs.</h2><p>Ask, price, best ammo, CS2 market, music, allergies, hate management, image generation, and more — all through Discord slash commands.</p><code class="card-code">/ask · /price · /play<br>/hate · /imagine · /queue</code></article></section>
-<footer class="footer">THEPATRICK // BIRDS SERVER AI BOT // AUTHORIZED OPERATORS ONLY</footer></main></body></html>`;
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:28px 20px 40px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:radial-gradient(1100px 520px at 15% -12%,rgba(92,186,160,.10) 0,rgba(92,186,160,0) 62%),radial-gradient(900px 480px at 100% 0,rgba(230,180,95,.07) 0,rgba(230,180,95,0) 55%),#181714;color:#f1ede4;line-height:1.55}
+.shell{width:min(960px,100%);margin:0 auto}
+.banner{display:block;width:100%;height:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.hero{padding:36px 0 30px;max-width:660px}
+.hero p{margin:0 0 22px;color:#a49d8f;font-size:1rem;max-width:560px}
+.status{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:#1b3024;border:1px solid #2e4b3a;color:#8ad9ab;font-size:.76rem;font-weight:600}
+.status i{width:6px;height:6px;border-radius:50%;background:#6ecf98}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.login,.site{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:11px;text-decoration:none;font-weight:600;font-size:.9rem}
+.login{background:#5cbaa0;color:#0d1a16}
+.login:hover{background:#74cdb4}
+.site{background:#211f1b;border:1px solid #4b473d;color:#d8d2c6}
+.site:hover{background:#292620}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:34px}
+.card{padding:18px;background:#211f1b;border:1px solid #35322b;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.45)}
+.card h2{margin:0 0 6px;font-size:.92rem;letter-spacing:-.01em}
+.card p{margin:0;color:#a49d8f;font-size:.84rem}
+.tag{display:inline-block;margin-bottom:10px;padding:3px 8px;border-radius:999px;background:#1d322c;color:#a6e2d2;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.footer{margin-top:32px;padding-top:16px;border-top:1px solid #35322b;color:#847e71;font-size:.76rem;text-align:center}
+@media(max-width:600px){body{padding:20px 14px 32px}.hero{padding:40px 0 24px}}
+</style></head>
+<body><main class="shell">
+<img class="banner" src="/readme-banner.png" width="1280" height="360" alt="ThePatrick — Discord and Twitch bot for the Birds Server">
+<section class="hero">
+<h1 class="sr-only">ThePatrick Dashboard</h1>
+<p>Sign in with Discord to choose how Patrick talks — aggressive, sassy, nice, paranoid, or half asleep — and manage the roast list, Cultist alerts, and memory for the servers you administer.</p>
+<div class="status"><i></i>Discord sign-in required</div>
+<div class="actions"><a class="login" href="/auth/login?start=1">Sign in with Discord</a><a class="site" href="https://birdsserver.cfd/" target="_blank" rel="noopener">Visit the Birds Server</a></div>
+</section>
+<section class="grid">
+<article class="card"><span class="tag">Persona</span><h2>Five Patricks, one bot</h2><p>Aggressive, sassy, nice, conspiracy-minded, or half asleep. Each server keeps its own pick, and you can preview the voice before applying it.</p></article>
+<article class="card"><span class="tag">Per server</span><h2>One console, every server</h2><p>Pick a server you manage and change only that server's settings.</p></article>
+<article class="card"><span class="tag">Memory</span><h2>Local facts, shared recall</h2><p>Admins manage their own facts; the owner can promote the good ones everywhere.</p></article>
+
+</section>
+<footer class="footer">ThePatrick // Birds Server bot // Authorized operators only</footer>
+</main></body></html>`;
 }
 
 // ===== ROUTES =====

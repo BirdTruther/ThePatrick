@@ -114,6 +114,12 @@ app.use(express.json());
 // /api/auth/me must be registered before the global gate below.
 const dashboardAuth = require('./dashboard-auth.js');
 dashboardAuth.attachRoutes(app, { getDiscordClient });
+
+// Brand assets are referenced by the unauthenticated sign-in page, so serve
+// them before the dashboard gate. Everything else in /public stays protected.
+for (const file of ['logo.png', 'favicon.png', 'apple-touch-icon.png', 'readme-banner.png']) {
+  app.get(`/${file}`, (req, res) => res.sendFile(path.join(__dirname, 'public', file)));
+}
 app.use(dashboardAuth.requireAuth);
 
 // Guard server-scoped endpoints: the logged-in user must actually manage the

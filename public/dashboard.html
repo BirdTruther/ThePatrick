@@ -4,346 +4,285 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThePatrick Bot Dashboard</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
-        :root {
-            --color-bg-primary: #0f172a;
-            --color-bg-secondary: #1e293b;
-            --color-text-primary: #f1f5f9;
-            --color-text-secondary: #cbd5e1;
-            --color-primary: #0284c7;
-            --color-primary-hover: #0369a1;
-            --color-success: #22c55e;
-            --color-danger: #ef4444;
-            --color-warning: #f59e0b;
-            --radius: 8px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+*,*::before,*::after{box-sizing:border-box}
+:root{
+    --bg:#181714;
+    --surface:#211f1b;
+    --surface-muted:#292620;
+    --surface-sunken:#131210;
+    --ink:#f1ede4;
+    --ink-soft:#d8d2c6;
+    --muted:#a49d8f;
+    --line:#35322b;
+    --line-strong:#4b473d;
+    --accent:#5cbaa0;
+    --accent-hover:#74cdb4;
+    --accent-soft:#1d322c;
+    --accent-ink:#a6e2d2;
+    --success:#6ecf98;
+    --success-soft:#1b3024;
+    --danger:#f0907f;
+    --danger-soft:#3a211c;
+    --warn:#e6b45f;
+    --warn-soft:#352914;
+    --info:#8cb6e2;
+    --info-soft:#1d2938;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(0,0,0,.45),0 18px 40px -26px rgba(0,0,0,.95);
+    --color-bg-primary:var(--bg);
+    --color-bg-secondary:var(--surface);
+    --color-text-primary:var(--ink);
+    --color-text-secondary:var(--muted);
+    --color-primary:var(--accent);
+    --color-primary-hover:var(--accent-hover);
+    --color-success:var(--success);
+    --color-danger:var(--danger);
+    --color-warning:var(--warn);
+    --color-accent:var(--accent);
+}
+html{color-scheme:dark;-webkit-text-size-adjust:100%}
+body{margin:0;padding:0;min-height:100vh;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:radial-gradient(1100px 520px at 15% -12%,rgba(92,186,160,.10) 0,rgba(92,186,160,0) 62%),radial-gradient(900px 480px at 100% 0,rgba(230,180,95,.07) 0,rgba(230,180,95,0) 55%),var(--bg);background-attachment:fixed}
+::selection{background:rgba(92,186,160,.28)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.container{width:min(1180px,100%);margin:0 auto;padding:28px 24px 44px}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Header */
+.app-header{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:22px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{width:46px;height:46px;flex:0 0 auto;display:grid;place-items:center;border-radius:13px;background:#14131a;border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 -8px 16px rgba(0,0,0,.18)}
+.brand-mark img{width:34px;height:34px;display:block}
+h1{margin:0;font-size:1.45rem;font-weight:650;letter-spacing:-.025em;line-height:1.2;color:var(--ink)}
+.subtitle{margin:3px 0 0;color:var(--muted);font-size:.9rem}
+.auth-bar{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 8px 7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font-size:.82rem;box-shadow:var(--shadow)}
+.auth-bar:empty{display:none}
+.auth-bar a{padding:4px 10px;border-radius:999px;background:var(--surface-muted);border:1px solid var(--line);color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:.78rem}
+.auth-bar a:hover{background:#302d26;color:var(--ink)}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, var(--color-bg-primary) 0%, #020617 100%);
-            color: var(--color-text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-        }
+/* Alerts */
+#alerts{position:fixed;top:20px;right:20px;z-index:1200;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 40px))}
+.alert{display:none;padding:12px 15px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:.88rem;font-weight:500;box-shadow:0 16px 40px -16px rgba(0,0,0,.8);animation:slideIn .22s ease}
+.alert.show{display:block}
+.alert-success{background:var(--success-soft);border-color:#2e4b3a;color:#8ad9ab}
+.alert-error{background:var(--danger-soft);border-color:#553029;color:#f3a99d}
+.alert-warning{background:var(--warn-soft);border-color:#4e3d1e;color:#ecc47a}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
-        .container { max-width: 1200px; margin: 0 auto; }
+/* Server bar */
+.server-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 20px;padding:13px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.server-bar label{font-size:.78rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.server-bar select{width:auto;min-width:240px;max-width:100%}
+.server-bar-hint{color:var(--muted);font-size:.82rem}
 
-        header { text-align: center; margin-bottom: 40px; padding: 30px 0; }
+/* Cards: two balanced columns, no row gaps */
+.dashboard-grid{column-count:2;column-gap:18px;margin-bottom:10px}
+.card{display:block;break-inside:avoid;page-break-inside:avoid;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px 22px;box-shadow:var(--shadow);margin:0 0 18px}
+.card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.card-title{display:flex;align-items:center;gap:11px;font-size:.98rem;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.card-icon{width:32px;height:32px;flex:0 0 auto;display:grid;place-items:center;border-radius:9px;background:var(--accent-soft);color:var(--accent);border:1px solid #2e4b3a}
+.card-icon svg{width:17px;height:17px}
+.card-lead{margin:0 0 14px;color:var(--muted);font-size:.87rem;line-height:1.5}
 
-        /* FIX 4: header h1 — emoji always visible, title text readable */
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            /* Removed gradient clip that made emoji invisible */
-            color: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
+/* Status */
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface-muted);color:var(--muted);font-size:.73rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+.status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7}
+.status-badge.active{background:var(--success-soft);border-color:#2e4b3a;color:#87d6a9}
+.status-badge.active::before{opacity:1}
+.status-badge.inactive{background:var(--surface-muted);border-color:var(--line);color:var(--muted)}
+.status-badge.inactive::before{opacity:.45}
 
-        /* The emoji span is never gradient-clipped */
-        .title-emoji {
-            font-style: normal;
-            -webkit-text-fill-color: initial;
-            color: initial;
-            display: inline-block;
-        }
+/* Key/value lists */
+.value-list{margin:0 0 4px;padding:4px 14px;background:var(--surface-muted);border:1px solid var(--line);border-radius:12px}
+.value-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:7px 0;font-size:.88rem}
+.value-row+.value-row{border-top:1px dashed var(--line)}
+.value-row dt{color:var(--muted);font-weight:500}
+.value-row dd{margin:0;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
 
-        /* The text part gets a subtle blue gradient safely via a nested span */
-        .title-text {
-            background: linear-gradient(135deg, #60c0f8, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+/* Form controls */
+.control-section{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.control-section:first-of-type{margin-top:14px}
+.control-section>:last-child{margin-bottom:0}
+.field{margin-bottom:12px}
+.field-label,.control-label{display:block;margin-bottom:6px;font-size:.76rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.optional{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
+.persona-select,.logs-search{width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:#191814;color:var(--ink);font-family:inherit;font-size:.88rem;line-height:1.4;transition:border-color .15s ease,box-shadow .15s ease}
+.persona-select:hover,.logs-search:hover{border-color:#605a4c}
+.persona-select:focus,.logs-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(92,186,160,.22)}
+.persona-select::placeholder,.logs-search::placeholder{color:#7a7467}
+select.persona-select{appearance:auto;cursor:pointer}
+.persona-description{margin:0 0 14px;padding:11px 13px;border-radius:var(--radius-sm);background:var(--surface-muted);border:1px solid var(--line);color:var(--ink-soft);font-size:.84rem;line-height:1.5}
+.button-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 
-        .subtitle { color: var(--color-text-secondary); font-size: 1.1rem; }
+/* Toggles */
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.switch-title{display:block;font-size:.88rem;font-weight:600;color:var(--ink)}
+.switch-hint{display:block;font-size:.79rem;color:var(--muted);margin-top:1px}
+.toggle-switch{position:relative;display:inline-block;width:46px;height:26px;flex:0 0 auto}
+.toggle-switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;cursor:pointer;background:#4a463c;border-radius:999px;transition:background .2s ease}
+.slider::before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#e9e4d9;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.5);transition:transform .2s ease}
+.toggle-switch input:checked+.slider{background:var(--accent)}
+.toggle-switch input:checked+.slider::before{transform:translateX(20px);background:#0d1a16}
+.toggle-switch input:focus-visible+.slider{box-shadow:0 0 0 3px rgba(92,186,160,.3)}
+.check-row{display:inline-flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted);font-size:.82rem;cursor:pointer}
+.check-row input{accent-color:var(--accent);width:15px;height:15px}
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
+/* Buttons */
+.button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;margin:0;border:1px solid transparent;border-radius:var(--radius-sm);background:transparent;color:var(--ink);font-family:inherit;font-size:.86rem;font-weight:600;line-height:1.2;cursor:pointer;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.button-primary{background:var(--accent);border-color:var(--accent);color:#0d1a16}
+.button-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.button-secondary{background:var(--surface);border-color:var(--line-strong);color:var(--ink-soft)}
+.button-secondary:hover{background:var(--surface-muted);border-color:#605a4c;color:var(--ink)}
+.button-warn{background:var(--warn-soft);border-color:#4e3d1e;color:var(--warn)}
+.button-warn:hover{background:#3e3119}
+.button-danger{background:var(--surface);border-color:#53322c;color:var(--danger)}
+.button-danger:hover{background:var(--danger-soft)}
+.button:disabled{opacity:.45;cursor:not-allowed}
+.button:active:not(:disabled){transform:translateY(1px)}
 
-        .card {
-            background: var(--color-bg-secondary);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: var(--radius);
-            padding: 25px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
+/* Data box */
+.data-box{max-height:158px;overflow-y:auto;padding:11px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-sunken);color:var(--ink-soft);font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:.8rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.progress-hint{margin:0 0 10px;min-height:18px;font-size:.8rem;color:var(--muted);word-break:break-word}
 
-        .card:hover {
-            border-color: var(--color-primary);
-            box-shadow: 0 6px 20px rgba(2,132,199,0.2);
-            transform: translateY(-2px);
-        }
+/* Modals */
+.modal{display:none;position:fixed;inset:0;z-index:1000;padding:24px;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);animation:fadeIn .18s ease}
+.modal.show{display:flex;align-items:center;justify-content:center}
+.modal-content{display:flex;flex-direction:column;width:100%;max-width:920px;max-height:86vh;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 90px -24px rgba(0,0,0,.95);animation:slideUp .2s ease;overflow:hidden}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.modal-title{display:flex;align-items:center;gap:10px;font-size:1.02rem;font-weight:600;letter-spacing:-.01em}
+.modal-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--accent-soft);color:var(--accent);border:1px solid #2e4b3a}
+.modal-icon svg{width:16px;height:16px}
+.modal-close{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);font-size:1.4rem;line-height:1;cursor:pointer}
+.modal-close:hover{background:var(--surface-muted);border-color:var(--line);color:var(--ink)}
+.modal-body{flex:1;overflow-y:auto;padding:18px 20px 20px}
+.modal-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 20px;border-top:1px solid var(--line);background:var(--surface-muted)}
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255,255,255,0.05);
-        }
+/* Log controls */
+.logs-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.filter-group{display:inline-flex;gap:6px;flex-wrap:wrap;padding:3px;border-radius:999px;background:var(--surface-muted);border:1px solid var(--line)}
+.logs-filter{padding:6px 12px;border:1px solid transparent;border-radius:999px;background:transparent;color:var(--muted);font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.logs-filter:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.logs-filter.active{background:var(--ink);border-color:var(--ink);color:#181714}
+.logs-search{flex:1 1 200px;min-width:160px;width:auto}
 
-        .card-title { font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .card-icon { font-size: 1.5rem; }
+/* Log list */
+.logs-container{max-height:500px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-sunken);font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:.8rem}
+.log-entry{padding:9px 11px;margin-bottom:6px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px}
+.log-entry:last-child{margin-bottom:0}
+.log-entry:hover{border-color:var(--line-strong);border-left-color:var(--accent)}
+.log-entry.discord{border-left-color:#5865f2}
+.log-entry.twitch{border-left-color:#8b5cf6}
+.log-entry.error,.log-entry.ERROR{border-left-color:var(--danger);background:#2a1a17}
+.log-entry.CRITICAL{border-left-color:#ffb3a6;background:#301a16}
+.log-entry.WARNING{border-left-color:var(--warn);background:#2a2315}
+.log-entry.STARTUP{border-left-color:var(--success);background:#17261d}
+.log-entry.SHUTDOWN{border-left-color:#8a8478}
+.log-entry.CONNECTION{border-left-color:#6aa8d8}
+.log-entry.EXPORT{border-left-color:#a98cf0;background:#241f2e}
+.log-header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.log-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.75rem}
+.log-time{color:var(--muted)}
+.log-platform,.log-severity{padding:2px 7px;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid transparent}
+.log-platform.discord{background:#232447;border-color:#34366b;color:#a6adff}
+.log-platform.twitch{background:#291f3b;border-color:#3e2f5f;color:#c9aaff}
+.log-severity.INFO{background:var(--info-soft);border-color:#2b3d52;color:var(--info)}
+.log-severity.WARNING{background:var(--warn-soft);border-color:#4e3d1e;color:var(--warn)}
+.log-severity.ERROR{background:var(--danger-soft);border-color:#553029;color:#f3a99d}
+.log-severity.CRITICAL{background:#45201b;border-color:#5f2c24;color:#ffb4a8}
+.log-username{color:var(--accent-ink);font-weight:700}
+.log-command,.log-type{color:var(--warn);font-weight:700}
+.log-type.EXPORT{color:#b9a0ff}
+.log-message{margin-top:5px;padding-left:9px;border-left:2px solid var(--line);color:var(--ink);word-wrap:break-word;overflow-wrap:break-word}
+.log-response,.log-stack{margin-top:6px;max-height:150px;overflow-y:auto;padding:8px 10px;border-radius:6px;background:#191814;color:var(--ink-soft);font-size:.76rem;font-style:italic;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word}
+.log-image-link{margin-top:6px;padding:6px 9px;border-radius:6px;background:var(--accent-soft);border:1px solid #2e4b3a}
+.log-image-link a{color:var(--accent-ink);font-weight:600;text-decoration:none;font-size:.76rem;word-break:break-all}
+.log-image-link a:hover{text-decoration:underline}
+.logs-empty{padding:36px 20px;text-align:center;color:var(--muted);font-size:.84rem}
+.logs-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.logs-stats strong{color:var(--ink);font-weight:600}
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+/* Export status */
+.export-status-modal .modal-content{max-width:620px}
+.esm-input-row{display:flex;gap:8px;margin-bottom:10px}
+.esm-input-row input{flex:1;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:#191814;color:var(--ink);font-family:inherit;font-size:.88rem}
+.esm-input-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(92,186,160,.22)}
+.esm-input-row input::placeholder{color:#7a7467}
+.export-status-field{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.export-status-field:last-child{border-bottom:none}
+.export-status-field .esf-label{flex:0 0 auto;min-width:130px;color:var(--muted);font-weight:500}
+.export-status-field .esf-value{color:var(--ink);font-weight:600;text-align:right;word-break:break-all}
+.export-status-field .esf-value.running{color:var(--warn)}
+.export-status-field .esf-value.done{color:var(--success)}
+.export-status-field .esf-value.error{color:var(--danger)}
+.export-status-field .esf-value.queued{color:#b9a0ff}
+.export-progress-bar-wrap{margin:16px 0 6px;height:7px;overflow:hidden;border-radius:999px;background:var(--surface-sunken);border:1px solid var(--line)}
+.export-progress-bar{height:100%;width:0%;border-radius:999px;background:var(--accent);transition:width .4s ease}
+.export-progress-bar.done{width:100%;background:var(--success)}
+.export-progress-bar.error{width:100%;background:var(--danger)}
+.export-progress-bar.running{animation:progressPulse 1.6s ease-in-out infinite}
+@keyframes progressPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.export-dl-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 
-        .status-badge.active { background: rgba(34,197,94,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
-        .status-badge.inactive { background: rgba(239,68,68,0.2); color: var(--color-danger); border: 1px solid var(--color-danger); }
+/* Memory table */
+.data-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.86rem}
+.data-table thead th{padding:8px 6px;text-align:left;font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.data-table tbody td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
 
-        .status-info { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 4px solid var(--color-primary); }
+/* Footer */
+footer{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:.82rem}
+footer p{margin:0}
+.footer-note{margin-top:4px !important;color:#847e71;font-size:.78rem}
+.footer-sep{margin:0 6px;color:var(--line-strong)}
 
-        .status-item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-size: 0.95rem; }
-        .status-label { color: var(--color-text-secondary); font-weight: 500; }
-        .status-value { font-weight: 600; color: var(--color-primary); }
-
-        .control-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .control-label { display: block; margin-bottom: 12px; font-weight: 600; color: var(--color-text-primary); }
-
-        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(239,68,68,0.5); transition: 0.4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: 0.4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--color-success); }
-        input:checked + .slider:before { transform: translateX(26px); }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px 5px 10px 0;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .button-primary { background: var(--color-primary); color: white; }
-        .button-primary:hover { background: var(--color-primary-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(2,132,199,0.3); }
-        .button-primary:active { transform: translateY(0); }
-        .button-secondary { background: rgba(255,255,255,0.1); color: var(--color-text-primary); border: 1px solid rgba(255,255,255,0.2); }
-        .button-secondary:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-        .button-warn { background: rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.4); }
-        .button-warn:hover { background: rgba(250,204,21,0.25); border-color: rgba(250,204,21,0.6); }
-        .button-danger { background: rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.4); }
-        .button-danger:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-
-        /* FIX 3: Persona dropdown — fully visible at rest with solid bg/text/option colors */
-        .persona-select {
-            width: 100%;
-            padding: 12px;
-            background: #1a2742;
-            border: 1px solid #4a90c4;
-            border-radius: var(--radius);
-            color: #f1f5f9;
-            font-size: 0.95rem;
-            cursor: pointer;
-            margin-bottom: 15px;
-            -webkit-appearance: auto;
-            appearance: auto;
-        }
-        .persona-select option {
-            background: #1a2742;
-            color: #f1f5f9;
-        }
-        .persona-select:focus {
-            outline: 2px solid var(--color-primary);
-            outline-offset: 2px;
-            border-color: var(--color-primary);
-            background: #1e2f50;
-        }
-        .persona-select:hover {
-            border-color: #60c0f8;
-            background: #1e2f50;
-        }
-
-        .persona-description {
-            background: rgba(255,255,255,0.03);
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: var(--color-text-secondary);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .alert { padding: 15px; margin: 15px 0; border-radius: var(--radius); font-weight: 500; display: none; animation: slideIn 0.3s ease; }
-        .alert.show { display: block; }
-        .alert-success { background: rgba(34,197,94,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
-        .alert-error { background: rgba(239,68,68,0.2); color: var(--color-danger); border: 1px solid var(--color-danger); }
-        .alert-warning { background: rgba(245,158,11,0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
-
-        @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); animation: fadeIn 0.3s ease; }
-        .modal.show { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: var(--color-bg-secondary); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: slideUp 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-header { padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .modal-close { background: none; border: none; color: var(--color-text-secondary); font-size: 1.8rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s; }
-        .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--color-text-primary); }
-        .modal-body { padding: 20px 25px; overflow-y: auto; flex: 1; }
-        .modal-footer { padding: 15px 25px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-
-        .logs-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .logs-filter { padding: 8px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); color: var(--color-text-primary); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
-        .logs-filter:hover { background: rgba(255,255,255,0.1); }
-        .logs-filter.active { background: var(--color-primary); border-color: var(--color-primary); }
-        .logs-search { flex: 1; min-width: 200px; padding: 8px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); color: var(--color-text-primary); font-size: 0.9rem; }
-        .logs-search:focus { outline: none; border-color: var(--color-primary); background: rgba(255,255,255,0.08); }
-
-        .logs-container { background: rgba(0,0,0,0.3); border-radius: var(--radius); padding: 15px; font-family: 'Courier New', monospace; font-size: 0.85rem; max-height: 500px; overflow-y: auto; }
-
-        .log-entry { padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--color-primary); border-radius: 4px; transition: all 0.2s; }
-        .log-entry:hover { background: rgba(255,255,255,0.06); }
-        .log-entry.discord { border-left-color: #5865F2; }
-        .log-entry.twitch { border-left-color: #9146FF; }
-        .log-entry.error, .log-entry.ERROR { border-left-color: var(--color-danger); background: rgba(239,68,68,0.05); }
-        .log-entry.CRITICAL { border-left-color: #dc2626; background: rgba(220,38,38,0.1); }
-        .log-entry.WARNING { border-left-color: var(--color-warning); background: rgba(245,158,11,0.05); }
-        .log-entry.STARTUP { border-left-color: var(--color-success); }
-        .log-entry.SHUTDOWN { border-left-color: #6b7280; }
-        .log-entry.CONNECTION { border-left-color: #06b6d4; }
-        .log-entry.EXPORT { border-left-color: #a78bfa; }
-
-        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .log-meta { display: flex; gap: 10px; align-items: center; font-size: 0.8rem; }
-        .log-time { color: var(--color-text-secondary); }
-
-        .log-platform, .log-severity {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-
-        .log-platform.discord { background: rgba(88,101,242,0.2); color: #5865F2; }
-        .log-platform.twitch { background: rgba(145,70,255,0.2); color: #9146FF; }
-        .log-severity.INFO { background: rgba(2,132,199,0.2); color: var(--color-primary); }
-        .log-severity.WARNING { background: rgba(245,158,11,0.2); color: var(--color-warning); }
-        .log-severity.ERROR { background: rgba(239,68,68,0.2); color: var(--color-danger); }
-        .log-severity.CRITICAL { background: rgba(220,38,38,0.3); color: #dc2626; }
-
-        .log-username { color: var(--color-primary); font-weight: 600; }
-        .log-command, .log-type { color: var(--color-warning); font-weight: 600; }
-        .log-type.EXPORT { color: #a78bfa; }
-
-        .log-message { color: var(--color-text-primary); margin-top: 5px; padding-left: 10px; border-left: 2px solid rgba(255,255,255,0.1); word-wrap: break-word; overflow-wrap: break-word; }
-        .log-response, .log-stack { color: var(--color-text-secondary); margin-top: 5px; font-size: 0.8rem; font-style: italic; word-wrap: break-word; overflow-wrap: break-word; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; max-height: 150px; overflow-y: auto; }
-        .log-image-link { margin-top: 8px; padding: 8px; background: rgba(2,132,199,0.1); border-radius: 4px; border-left: 3px solid var(--color-primary); }
-        .log-image-link a { color: var(--color-primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; word-break: break-all; }
-        .log-image-link a:hover { color: #06b6d4; text-decoration: underline; }
-
-        .logs-empty { text-align: center; padding: 40px; color: var(--color-text-secondary); }
-        .logs-stats { display: flex; gap: 20px; font-size: 0.85rem; color: var(--color-text-secondary); }
-
-        /* FIX 2: Export Status modal styles */
-        .export-status-modal .modal-content { max-width: 620px; }
-        .export-status-field {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 0.92rem;
-            gap: 12px;
-        }
-        .export-status-field:last-child { border-bottom: none; }
-        .export-status-field .esf-label { color: var(--color-text-secondary); font-weight: 500; min-width: 130px; flex-shrink: 0; }
-        .export-status-field .esf-value { color: var(--color-text-primary); font-weight: 600; text-align: right; word-break: break-all; }
-        .export-status-field .esf-value.running { color: var(--color-warning); }
-        .export-status-field .esf-value.done { color: var(--color-success); }
-        .export-status-field .esf-value.error { color: var(--color-danger); }
-        .export-status-field .esf-value.queued { color: #a78bfa; }
-        .export-progress-bar-wrap { margin: 16px 0 6px; background: rgba(255,255,255,0.06); border-radius: 6px; height: 8px; overflow: hidden; }
-        .export-progress-bar { height: 100%; background: var(--color-primary); border-radius: 6px; transition: width 0.4s ease; width: 0%; }
-        .export-progress-bar.done { background: var(--color-success); width: 100%; }
-        .export-progress-bar.error { background: var(--color-danger); width: 100%; }
-        .export-progress-bar.running { animation: progressPulse 1.5s ease-in-out infinite; }
-        @keyframes progressPulse {
-            0%,100% { opacity: 1; }
-            50% { opacity: 0.55; }
-        }
-        .esm-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
-        .esm-input-row input {
-            flex: 1;
-            padding: 10px 12px;
-            background: #1a2742;
-            border: 1px solid #4a90c4;
-            border-radius: var(--radius);
-            color: #f1f5f9;
-            font-size: 0.9rem;
-        }
-        .esm-input-row input:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-        .esm-input-row input::placeholder { color: #64748b; }
-        .export-dl-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-
-        footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: var(--color-text-secondary); font-size: 0.9rem; }
-        .auth-bar { margin-top: 14px; font-size: 0.85rem; color: var(--color-text-secondary); }
-        .auth-bar a { color: var(--color-primary); margin-left: 12px; text-decoration: none; }
-        .auth-bar a:hover { text-decoration: underline; }
-        .server-bar {
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-            margin: 0 0 24px; padding: 14px 18px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: var(--radius);
-        }
-        .server-bar label { font-weight: 600; }
-        .server-bar select { min-width: 240px; padding: 8px 10px; border-radius: var(--radius); background: #1a2742; border: 1px solid #4a90c4; color: #f1f5f9; font-size: 0.9rem; }
-        .server-bar-hint { color: var(--color-text-secondary); font-size: 0.8rem; }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 1.8rem; }
-            .dashboard-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; max-height: 90vh; }
-            .logs-controls { flex-direction: column; }
-            .logs-search { width: 100%; }
-        }
+/* Utilities */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (max-width:820px){
+    .dashboard-grid{column-count:1}
+}
+@media (max-width:760px){
+    .container{padding:20px 16px 32px}
+    h1{font-size:1.25rem}
+    .brand-mark{width:40px;height:40px;border-radius:11px}
+    .brand-mark img{width:30px;height:30px}
+    .card{padding:18px 18px 20px;margin-bottom:14px}
+    .modal{padding:12px}
+    .modal-content{max-height:92vh}
+    .logs-controls{flex-direction:column;align-items:stretch}
+    .filter-group{justify-content:center}
+    .logs-search{width:100%}
+    .server-bar select{min-width:0;width:100%}
+    .server-bar{gap:8px}
+    .log-meta{gap:6px}
+}
+@media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <!-- FIX 4: emoji in own span so gradient clip doesn't hide it -->
-            <h1><span class="title-emoji">&#x1F916;</span><span class="title-text">ThePatrick Bot Dashboard</span></h1>
-            <p class="subtitle">ThePatrick's Birds Server AI Bot Control Panel</p>
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true"><img src="/logo.png" alt="" width="34" height="34" decoding="async"></div>
+                <div>
+                    <h1>ThePatrick Dashboard</h1>
+                    <p class="subtitle">Control panel for the Birds Server bot</p>
+                </div>
+            </div>
             <div id="auth-bar" class="auth-bar"></div>
         </header>
 
         <div id="alerts"></div>
 
         <div class="server-bar">
-            <label for="server-select">Managing server:</label>
+            <label for="server-select">Managing server</label>
             <select id="server-select" class="persona-select">
                 <option value="">Loading servers...</option>
             </select>
@@ -351,167 +290,221 @@
         </div>
 
         <div class="dashboard-grid">
-            <!-- AI Persona Card -->
-            <div class="card">
+
+            <!-- AI Persona -->
+            <section class="card">
                 <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x1F3AD;</span> AI Persona</div>
-                    <span id="persona-status" class="status-badge active">ACTIVE</span>
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6 4.6 1.9-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/></svg></span>
+                        AI Persona
+                    </div>
+                    <span id="persona-status" class="status-badge active">Active</span>
                 </div>
-                <div class="status-info">
-                    <p style="color:var(--color-text-secondary);margin-bottom:15px;">Control ThePatrick's personality and response style</p>
-                </div>
-                <div class="control-section">
-                    <label class="control-label">Select Persona</label>
-                    <!-- FIX 3: persona-select now uses solid bg/text colors, readable at rest -->
+                <p class="card-lead">The voice Patrick answers in. Each server can pick its own.</p>
+                <div class="field">
+                    <label class="field-label" for="persona-select">Persona</label>
                     <select id="persona-select" class="persona-select">
-                        <option value="aggressive">&#x1F624; Aggressive/Mean</option>
-                        <option value="sassy">&#x1F485; Sassy &amp; Stupid</option>
-                        <option value="nice">&#x1F60A; Nice &amp; Smart</option>
-                        <option value="conspiracy">&#x1F441;&#xFE0F; Paranoid Conspiracy</option>
-                        <option value="sleepy">&#x1F634; Sleepy/High Patrick</option>
+                        <option value="aggressive">Aggressive &amp; mean</option>
+                        <option value="sassy">Sassy &amp; stupid</option>
+                        <option value="nice">Nice &amp; smart</option>
+                        <option value="conspiracy">Paranoid conspiracy</option>
+                        <option value="sleepy">Sleepy &amp; high</option>
                     </select>
-                    <div id="persona-description" class="persona-description">Classic toxic gamer - ego checks, 'git gud' energy, heavy sarcasm</div>
-                    <button class="button button-primary" id="apply-persona-btn">&#x2705; Apply Persona</button>
-                    <button class="button button-secondary" id="preview-persona-btn">&#x1F441;&#xFE0F; Preview</button>
                 </div>
-            </div>
+                <div id="persona-description" class="persona-description">Classic toxic gamer: ego checks, "git gud" energy, heavy sarcasm.</div>
+                <div class="button-row">
+                    <button class="button button-primary" id="apply-persona-btn">Apply persona</button>
+                    <button class="button button-secondary" id="preview-persona-btn">Preview</button>
+                </div>
+            </section>
 
-            <!-- Cultist Monitoring Card -->
-            <div class="card">
+            <!-- Hate List -->
+            <section class="card">
                 <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x1F319;</span> Cultist Monitor</div>
-                    <span id="cultist-status" class="status-badge inactive">OFFLINE</span>
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4.1 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
+                        Hate List
+                    </div>
+                    <span id="hate-status" class="status-badge inactive">Offline</span>
                 </div>
-                <div class="status-info">
-                    <div class="status-item"><span class="status-label">Monitoring:</span><span class="status-value" id="cultist-monitoring">Disabled</span></div>
-                    <div class="status-item"><span class="status-label">Server 1:</span><span class="status-value" id="cultist-s1-status">Unknown</span></div>
-                    <div class="status-item"><span class="status-label">Server 2:</span><span class="status-value" id="cultist-s2-status">Unknown</span></div>
-                    <div class="status-item"><span class="status-label">Tarkov Time:</span><span class="status-value" id="tarkov-time">--:--</span></div>
-                </div>
-                <div class="control-section">
-                    <label class="control-label">
-                        <span style="display:block;margin-bottom:10px;">Post cultist alerts in this server</span>
-                        <label class="toggle-switch"><input type="checkbox" id="cultist-toggle"><span class="slider"></span></label>
-                    </label>
-                </div>
-                <div class="control-section">
-                    <label class="control-label" for="cultist-channel">Alert Channel ID</label>
-                    <input type="text" id="cultist-channel" placeholder="Discord channel ID" class="persona-select" style="width:100%;margin-bottom:10px;">
-                    <label class="control-label" for="cultist-role">Cultist Role ID (optional ping)</label>
-                    <input type="text" id="cultist-role" placeholder="Role ID to ping" class="persona-select" style="width:100%;margin-bottom:10px;">
-                    <button class="button button-primary" id="save-cultist-config-btn">&#x1F4BE; Save</button>
-                    <button class="button button-secondary" id="refresh-cultist-btn">&#x1F504; Refresh Status</button>
-                </div>
-            </div>
-
-            <!-- Hate List Card -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x1F608;</span> Bot's Hate List</div>
-                    <span id="hate-status" class="status-badge inactive">OFFLINE</span>
-                </div>
-                <p style="color:var(--color-text-secondary);margin-bottom:15px;">These Discord users get extra venom from the bot. Heavy roast vibes.</p>
-                <div class="status-info">
-                    <div class="status-item"><span class="status-label">Hated Users:</span><span class="status-value" id="hate-count">0</span></div>
-                </div>
-                <div id="hate-list" style="max-height:150px;overflow-y:auto;padding:10px;background:rgba(0,0,0,0.18);border-radius:6px;color:var(--color-text-secondary);font-family:monospace;font-size:0.85rem;white-space:pre-wrap;">No users on this server's hate list.</div>
-                <label id="hate-all-label" style="display:none;align-items:center;gap:6px;margin-top:10px;color:var(--color-text-secondary);font-size:0.85rem;">
+                <p class="card-lead">Roleplay roast list. Patrick tags and roasts these members with AI-generated lines.</p>
+                <dl class="value-list">
+                    <div class="value-row"><dt>Hated users</dt><dd id="hate-count">0</dd></div>
+                </dl>
+                <div id="hate-list" class="data-box">No users on this server's hate list.</div>
+                <label id="hate-all-label" class="check-row" style="display:none;">
                     <input type="checkbox" id="hate-all-toggle"> View all server lists (superadmin)
                 </label>
                 <div class="control-section">
-                    <label class="control-label" for="hate-channel">Roast Channel ID</label>
-                    <input type="text" id="hate-channel" placeholder="Discord channel ID" class="persona-select" style="width:100%;margin-bottom:8px;">
-                    <button class="button button-primary" id="save-hate-config-btn">&#x1F4BE; Save Roast Channel</button>
+                    <div class="field">
+                        <label class="field-label" for="hate-channel">Roast channel ID</label>
+                        <input type="text" id="hate-channel" class="persona-select" placeholder="Discord channel ID">
+                    </div>
+                    <button class="button button-primary" id="save-hate-config-btn">Save roast channel</button>
                 </div>
                 <div class="control-section">
-                    <span class="status-label" style="display:block;margin-bottom:10px;">Roast Pings (proactive hate timer + callouts)</span>
-                    <label class="toggle-switch"><input type="checkbox" id="hate-pings-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="control-section">
-                    <label class="control-label" for="hate-user">User ID</label>
-                    <input type="text" id="hate-user" placeholder="Discord user ID" class="persona-select" style="width:100%;margin-bottom:10px;">
-                    <div>
-                        <button class="button button-primary" id="hate-add-btn">&#x1F608; Add</button>
-                        <button class="button button-secondary" id="hate-remove-btn">&#x1F607; Remove</button>
-                        <button class="button button-secondary" id="hate-refresh-btn">&#x1F504; Refresh</button>
+                    <div class="switch-row">
+                        <div>
+                            <span class="switch-title">Roast pings</span>
+                            <span class="switch-hint">Proactive hourly timer and chat callouts</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="hate-pings-toggle">
+                            <span class="slider"></span>
+                            <span class="sr-only">Roast pings</span>
+                        </label>
                     </div>
                 </div>
-            </div>
-
-            <!-- Bot Memory Card -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x1F9E0;</span> Bot Memory</div>
-                    <span id="memory-status" class="status-badge inactive">OFFLINE</span>
+                <div class="control-section">
+                    <div class="field">
+                        <label class="field-label" for="hate-user">User ID</label>
+                        <input type="text" id="hate-user" class="persona-select" placeholder="Discord user ID">
+                    </div>
+                    <div class="button-row">
+                        <button class="button button-primary" id="hate-add-btn">Add</button>
+                        <button class="button button-secondary" id="hate-remove-btn">Remove</button>
+                        <button class="button button-secondary" id="hate-refresh-btn">Refresh</button>
+                    </div>
                 </div>
-                <p style="color:var(--color-text-secondary);margin-bottom:15px;">Durable facts Patrick remembers about the server and its people.</p>
-                <div class="status-info">
-                    <div class="status-item"><span class="status-label">Facts:</span><span class="status-value" id="memory-count">0</span></div>
+            </section>
+
+            <!-- Bot Memory -->
+            <section class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span>
+                        Bot Memory
+                    </div>
+                    <span id="memory-status" class="status-badge inactive">Offline</span>
+                </div>
+                <p class="card-lead">Durable facts Patrick remembers about this server and its people. Manually added facts stay pinned.</p>
+                <dl class="value-list">
+                    <div class="value-row"><dt>Facts</dt><dd id="memory-count">0</dd></div>
+                </dl>
+                <div class="control-section">
+                    <div class="button-row">
+                        <button class="button button-primary" id="memory-view-btn">Open memory</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cultist Monitor -->
+            <section class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></span>
+                        Cultist Monitor
+                    </div>
+                    <span id="cultist-status" class="status-badge inactive">Offline</span>
+                </div>
+                <dl class="value-list">
+                    <div class="value-row"><dt>Monitoring</dt><dd id="cultist-monitoring">Disabled</dd></div>
+                    <div class="value-row"><dt>Server 1</dt><dd id="cultist-s1-status">Unknown</dd></div>
+                    <div class="value-row"><dt>Server 2</dt><dd id="cultist-s2-status">Unknown</dd></div>
+                    <div class="value-row"><dt>Tarkov time</dt><dd id="tarkov-time">--:--</dd></div>
+                </dl>
+                <div class="control-section">
+                    <div class="switch-row">
+                        <div>
+                            <span class="switch-title">Post cultist alerts</span>
+                            <span class="switch-hint">Into this server's alert channel</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="cultist-toggle">
+                            <span class="slider"></span>
+                            <span class="sr-only">Post cultist alerts in this server</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="control-section">
-                    <button class="button button-primary" id="memory-view-btn">&#x1F9E0; View Memory</button>
+                    <div class="field">
+                        <label class="field-label" for="cultist-channel">Alert channel ID</label>
+                        <input type="text" id="cultist-channel" class="persona-select" placeholder="Discord channel ID">
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="cultist-role">Cultist role ID <span class="optional">optional ping</span></label>
+                        <input type="text" id="cultist-role" class="persona-select" placeholder="Role ID to ping">
+                    </div>
+                    <div class="button-row">
+                        <button class="button button-primary" id="save-cultist-config-btn">Save</button>
+                        <button class="button button-secondary" id="refresh-cultist-btn">Refresh status</button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Bot Status Card -->
-            <div class="card">
+            <!-- Bot Status -->
+            <section class="card">
                 <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x26A1;</span> Bot Status</div>
-                    <span id="bot-status" class="status-badge inactive">OFFLINE</span>
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5 6 4-14 2.5 8H21"/></svg></span>
+                        Bot Status
+                    </div>
+                    <span id="bot-status" class="status-badge inactive">Offline</span>
                 </div>
-                <div class="status-info">
-                    <div class="status-item"><span class="status-label">Connection:</span><span class="status-value" id="bot-connection">Unknown</span></div>
-                    <!-- FIX 1: uptime now comes from formatUptime() in dashboard-server.js -->
-                    <div class="status-item"><span class="status-label">Uptime:</span><span class="status-value" id="bot-uptime">--</span></div>
-                    <div class="status-item"><span class="status-label">Last Check:</span><span class="status-value" id="last-check">Never</span></div>
-                </div>
+                <dl class="value-list">
+                    <div class="value-row"><dt>Connection</dt><dd id="bot-connection">Unknown</dd></div>
+                    <div class="value-row"><dt>Uptime</dt><dd id="bot-uptime">--</dd></div>
+                    <div class="value-row"><dt>Last check</dt><dd id="last-check">Never</dd></div>
+                </dl>
                 <div class="control-section">
-                    <button class="button button-primary" id="check-bot-btn">&#x1F50D; Check Status</button>
+                    <div class="button-row">
+                        <button class="button button-primary" id="check-bot-btn">Check status</button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Quick Actions Card -->
-            <div class="card">
+            <!-- Quick Actions -->
+            <section class="card">
                 <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x2699;&#xFE0F;</span> Quick Actions</div>
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
+                        Quick Actions
+                    </div>
                 </div>
-                <div class="status-info">
-                    <p style="color:var(--color-text-secondary);margin-bottom:15px;">Common bot control operations</p>
-                </div>
+                <p class="card-lead">Common operator tasks.</p>
                 <div class="control-section">
-                    <button class="button button-primary" id="reload-commands-btn">&#x1F504; Reload Commands</button>
-                    <button class="button button-secondary" id="view-logs-btn">&#x1F4CB; Command Logs</button>
-                    <button class="button button-secondary" id="view-system-logs-btn">&#x1F527; System Logs</button>
-                    <!-- FIX 2: Export Status button opens the new modal -->
-                    <button class="button button-secondary" id="view-export-status-btn" style="border-color:#a78bfa;color:#a78bfa;">&#x1F54A;&#xFE0F; Export Status</button>
+                    <div class="button-row">
+                        <button class="button button-primary" id="reload-commands-btn">Reload commands</button>
+                        <button class="button button-secondary" id="view-logs-btn">Command logs</button>
+                        <button class="button button-secondary" id="view-system-logs-btn">System logs</button>
+                        <button class="button button-secondary" id="view-export-status-btn">Export status</button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Memorial Message Exporter Card -->
-            <div class="card">
+            <!-- Message Exporter -->
+            <section class="card">
                 <div class="card-header">
-                    <div class="card-title"><span class="card-icon">&#x1F54A;&#xFE0F;</span> Message Exporter</div>
-                    <span id="export-status-badge" class="status-badge inactive">IDLE</span>
+                    <div class="card-title">
+                        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19h16"/></svg></span>
+                        Message Exporter
+                    </div>
+                    <span id="export-status-badge" class="status-badge inactive">Idle</span>
                 </div>
-                <div class="status-info">
-                    <p style="color:var(--color-text-secondary);margin-bottom:10px;">Export all messages from a Discord user across all accessible channels. Use this to gather data for a memorial or tribute page.</p>
-                    <div class="status-item"><span class="status-label">Status:</span><span class="status-value" id="export-status-text">Ready</span></div>
-                    <div class="status-item"><span class="status-label">Messages found:</span><span class="status-value" id="export-count">&#x2014;</span></div>
-                </div>
+                <p class="card-lead">Export every message from a Discord user across the channels Patrick can read. Downloads as JSON or CSV.</p>
+                <dl class="value-list">
+                    <div class="value-row"><dt>Status</dt><dd id="export-status-text">Ready</dd></div>
+                    <div class="value-row"><dt>Messages found</dt><dd id="export-count">&mdash;</dd></div>
+                </dl>
                 <div class="control-section">
-                    <label class="control-label">Discord User ID</label>
-                    <input type="text" id="export-user-id" class="persona-select" placeholder="e.g. 1080194115133779988" style="margin-bottom:12px;">
-                    <p id="export-progress-msg" style="font-size:0.82rem;color:var(--color-text-secondary);margin-bottom:10px;min-height:18px;"></p>
-                    <button class="button button-primary" id="export-start-btn">&#x1F50D; Start Export</button>
-                    <button class="button button-secondary" id="export-dl-json-btn" style="display:none;">&#x2B07;&#xFE0F; JSON</button>
-                    <button class="button button-secondary" id="export-dl-csv-btn" style="display:none;">&#x2B07;&#xFE0F; CSV</button>
+                    <div class="field">
+                        <label class="field-label" for="export-user-id">Discord user ID</label>
+                        <input type="text" id="export-user-id" class="persona-select" placeholder="e.g. 1080194115133779988">
+                    </div>
+                    <p id="export-progress-msg" class="progress-hint"></p>
+                    <div class="button-row">
+                        <button class="button button-primary" id="export-start-btn">Start export</button>
+                        <button class="button button-secondary" id="export-dl-json-btn" style="display:none;">Download JSON</button>
+                        <button class="button button-secondary" id="export-dl-csv-btn" style="display:none;">Download CSV</button>
+                    </div>
                 </div>
-            </div>
+            </section>
+
         </div>
 
         <footer>
-            <p>Dashboard v1.6 | Last updated: <span id="footer-time">--:--:--</span></p>
-            <p>&#x1F4BB; Built with &#x2764;&#xFE0F; and Mountain Dew</p>
+            <p>Dashboard v1.6 <span class="footer-sep">&middot;</span> Local time: <span id="footer-time">--:--:--</span></p>
+            <p class="footer-note">Built for the Birds Server with &hearts; and Mountain Dew</p>
         </footer>
     </div>
 
@@ -519,18 +512,20 @@
     <div id="logs-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title"><span>&#x1F4CB;</span> Command Logs</div>
-                <button class="modal-close" id="close-logs-modal">&times;</button>
+                <div class="modal-title"><span class="modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Command Logs</div>
+                <button class="modal-close" id="close-logs-modal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="logs-controls">
-                    <button class="logs-filter active" data-platform="all">All</button>
-                    <button class="logs-filter" data-platform="discord">Discord</button>
-                    <button class="logs-filter" data-platform="twitch">Twitch</button>
+                    <div class="filter-group">
+                        <button class="logs-filter active" data-platform="all">All</button>
+                        <button class="logs-filter" data-platform="discord">Discord</button>
+                        <button class="logs-filter" data-platform="twitch">Twitch</button>
+                    </div>
                     <input type="text" class="logs-search" id="logs-search" placeholder="Search logs...">
-                    <button class="button button-primary" id="refresh-logs-btn">&#x1F504; Refresh</button>
-                    <button class="button button-secondary" id="clear-logs-btn">&#x1F5D1;&#xFE0F; Clear All</button>
-                    <label id="logs-all-label" style="display:none;align-items:center;gap:6px;color:var(--color-text-secondary);font-size:0.85rem;">
+                    <button class="button button-secondary" id="refresh-logs-btn">Refresh</button>
+                    <button class="button button-secondary" id="clear-logs-btn">Clear all</button>
+                    <label id="logs-all-label" class="check-row" style="display:none;">
                         <input type="checkbox" id="logs-all-servers"> All servers
                     </label>
                 </div>
@@ -542,7 +537,7 @@
                 <div class="logs-stats">
                     <span>Total: <strong id="logs-total">0</strong></span>
                     <span>Showing: <strong id="logs-showing">0</strong></span>
-                    <span id="logs-auto-refresh">Auto-refresh: ON</span>
+                    <span id="logs-auto-refresh">Auto-refresh: on</span>
                 </div>
                 <button class="button button-secondary" id="close-logs-btn">Close</button>
             </div>
@@ -553,21 +548,23 @@
     <div id="system-logs-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title"><span>&#x1F527;</span> System Logs</div>
-                <button class="modal-close" id="close-system-logs-modal">&times;</button>
+                <div class="modal-title"><span class="modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.7-2.7 2.3-2.3z"/></svg></span>System Logs</div>
+                <button class="modal-close" id="close-system-logs-modal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="logs-controls">
-                    <button class="logs-filter active" data-filter="log_type" data-value="all">All Types</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="CRASH">Crashes</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="STARTUP">Startup</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="SHUTDOWN">Shutdown</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="ERROR">Errors</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="CONNECTION">Connection</button>
-                    <button class="logs-filter" data-filter="log_type" data-value="EXPORT" style="border-color:#a78bfa;color:#a78bfa;">&#x1F54A; Export</button>
+                    <div class="filter-group">
+                        <button class="logs-filter active" data-filter="log_type" data-value="all">All types</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="CRASH">Crashes</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="STARTUP">Startup</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="SHUTDOWN">Shutdown</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="ERROR">Errors</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="CONNECTION">Connection</button>
+                        <button class="logs-filter" data-filter="log_type" data-value="EXPORT">Export</button>
+                    </div>
                     <input type="text" class="logs-search" id="system-logs-search" placeholder="Search system logs...">
-                    <button class="button button-primary" id="refresh-system-logs-btn">&#x1F504; Refresh</button>
-                    <button class="button button-secondary" id="clear-system-logs-btn">&#x1F5D1;&#xFE0F; Clear All</button>
+                    <button class="button button-secondary" id="refresh-system-logs-btn">Refresh</button>
+                    <button class="button button-secondary" id="clear-system-logs-btn">Clear all</button>
                 </div>
                 <div class="logs-container" id="system-logs-container">
                     <div class="logs-empty">No system logs available.</div>
@@ -577,80 +574,48 @@
                 <div class="logs-stats">
                     <span>Total: <strong id="system-logs-total">0</strong></span>
                     <span>Showing: <strong id="system-logs-showing">0</strong></span>
-                    <span id="system-logs-auto-refresh">Auto-refresh: ON</span>
+                    <span id="system-logs-auto-refresh">Auto-refresh: on</span>
                 </div>
                 <button class="button button-secondary" id="close-system-logs-btn">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- FIX 2: Export Status Modal -->
+    <!-- Export Status Modal -->
     <div id="export-status-modal" class="modal export-status-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title"><span>&#x1F54A;&#xFE0F;</span> Export Status</div>
-                <button class="modal-close" id="close-export-status-modal">&times;</button>
+                <div class="modal-title"><span class="modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19h16"/></svg></span>Export Status</div>
+                <button class="modal-close" id="close-export-status-modal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Job ID lookup row -->
                 <div class="esm-input-row">
                     <input type="text" id="esm-job-id-input" placeholder="Paste export Job ID (e.g. 1716345612345)" autocomplete="off">
-                    <button class="button button-primary" id="esm-check-btn">&#x1F50D; Check</button>
+                    <button class="button button-primary" id="esm-check-btn">Check</button>
                 </div>
-                <p style="font-size:0.82rem;color:var(--color-text-secondary);margin-bottom:16px;">
-                    Enter a Job ID from a previously started export, or the current running job will auto-populate below.
-                </p>
-
-                <!-- Status fields -->
+                <p class="card-lead">Enter a Job ID from a previously started export, or the current running job will auto-populate below.</p>
                 <div id="esm-fields">
-                    <div class="export-status-field">
-                        <span class="esf-label">Job ID</span>
-                        <span class="esf-value" id="esm-jobid">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">User ID</span>
-                        <span class="esf-value" id="esm-userid">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">Status</span>
-                        <span class="esf-value" id="esm-status">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">Progress</span>
-                        <span class="esf-value" id="esm-progress">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">Messages Found</span>
-                        <span class="esf-value" id="esm-count">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">Started At</span>
-                        <span class="esf-value" id="esm-started">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field">
-                        <span class="esf-label">Completed At</span>
-                        <span class="esf-value" id="esm-completed">&#x2014;</span>
-                    </div>
-                    <div class="export-status-field" id="esm-error-row" style="display:none;">
-                        <span class="esf-label">Error</span>
-                        <span class="esf-value error" id="esm-error"></span>
-                    </div>
+                    <div class="export-status-field"><span class="esf-label">Job ID</span><span class="esf-value" id="esm-jobid">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">User ID</span><span class="esf-value" id="esm-userid">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">Status</span><span class="esf-value" id="esm-status">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">Progress</span><span class="esf-value" id="esm-progress">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">Messages Found</span><span class="esf-value" id="esm-count">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">Started At</span><span class="esf-value" id="esm-started">&mdash;</span></div>
+                    <div class="export-status-field"><span class="esf-label">Completed At</span><span class="esf-value" id="esm-completed">&mdash;</span></div>
+                    <div class="export-status-field" id="esm-error-row" style="display:none;"><span class="esf-label">Error</span><span class="esf-value error" id="esm-error"></span></div>
                 </div>
-
                 <div class="export-progress-bar-wrap" id="esm-bar-wrap" style="display:none;">
                     <div class="export-progress-bar" id="esm-bar"></div>
                 </div>
-
-                <!-- Download buttons, only shown when done -->
                 <div class="export-dl-row" id="esm-dl-row" style="display:none;">
-                    <button class="button button-primary" id="esm-dl-json">&#x2B07;&#xFE0F; Download JSON</button>
-                    <button class="button button-secondary" id="esm-dl-csv">&#x2B07;&#xFE0F; Download CSV</button>
+                    <button class="button button-primary" id="esm-dl-json">Download JSON</button>
+                    <button class="button button-secondary" id="esm-dl-csv">Download CSV</button>
                 </div>
             </div>
             <div class="modal-footer">
-                <span style="font-size:0.82rem;color:var(--color-text-secondary);" id="esm-last-refreshed"></span>
-                <div style="display:flex;gap:10px;">
-                    <button class="button button-primary" id="esm-refresh-btn">&#x1F504; Refresh</button>
+                <span class="server-bar-hint" id="esm-last-refreshed"></span>
+                <div class="button-row">
+                    <button class="button button-primary" id="esm-refresh-btn">Refresh</button>
                     <button class="button button-secondary" id="close-export-status-btn">Close</button>
                 </div>
             </div>
@@ -661,39 +626,38 @@
     <div id="memory-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title"><span>&#x1F9E0;</span> Bot Memory</div>
-                <button class="modal-close" id="close-memory-modal">&times;</button>
+                <div class="modal-title"><span class="modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span>Bot Memory</div>
+                <button class="modal-close" id="close-memory-modal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="logs-controls">
                     <input type="text" id="memory-filter" class="logs-search" placeholder="Filter facts or topics...">
-                    <button class="button button-primary" id="memory-refresh-btn">&#x1F504; Refresh</button>
-                    <button class="button button-secondary" id="memory-rebuild-btn">&#x2699;&#xFE0F; Rebuild Now</button>
-                    <label id="memory-shared-label" style="display:none;align-items:center;gap:6px;color:var(--color-text-secondary);font-size:0.85rem;">
+                    <button class="button button-secondary" id="memory-refresh-btn">Refresh</button>
+                    <button class="button button-secondary" id="memory-rebuild-btn">Rebuild now</button>
+                    <label id="memory-shared-label" class="check-row" style="display:none;">
                         <input type="checkbox" id="memory-shared-toggle"> Shared memory (all servers)
                     </label>
                 </div>
-                <p id="memory-scope-note" style="color:var(--color-text-secondary);margin:10px 0;">Patrick's durable, AI-maintained facts. Manually added facts are <strong>pinned</strong> so consolidation never drops them. Use the row actions to edit, pin/unpin, or delete a fact anytime.</p>
-                <div class="control-section" style="margin-bottom:12px;">
-                    <label class="control-label" for="memory-fact-input">Add a fact manually</label>
-                    <input type="text" id="memory-fact-input" class="persona-select" style="width:100%;margin-bottom:8px;" maxlength="140" placeholder="e.g. Bradyn mains scav runs in Tarkov">
-                    <input type="text" id="memory-topics-input" class="persona-select" style="width:100%;margin-bottom:8px;" placeholder="Topics, comma separated (e.g. bradyn, tarkov)">
-                    <button class="button button-primary" id="memory-add-btn">&#x2795; Add Fact</button>
+                <p id="memory-scope-note" class="card-lead">Patrick's durable facts. Manually added facts are pinned so consolidation never drops them.</p>
+                <div class="control-section">
+                    <label class="field-label" for="memory-fact-input">Add a fact manually</label>
+                    <div class="field">
+                        <input type="text" id="memory-fact-input" class="persona-select" maxlength="140" placeholder="e.g. Bradyn mains scav runs in Tarkov">
+                    </div>
+                    <div class="field">
+                        <input type="text" id="memory-topics-input" class="persona-select" placeholder="Topics, comma separated (e.g. bradyn, tarkov)">
+                    </div>
+                    <button class="button button-primary" id="memory-add-btn">Add fact</button>
                 </div>
-                <table id="memory-table" style="width:100%;border-collapse:collapse;margin-top:12px;">
+                <table id="memory-table" class="data-table">
                     <thead>
-                        <tr style="text-align:left;color:var(--color-text-secondary);">
-                            <th style="padding:6px;">#</th>
-                            <th style="padding:6px;">Fact</th>
-                            <th style="padding:6px;">Topics</th>
-                            <th style="padding:6px;">Actions</th>
-                        </tr>
+                        <tr><th>#</th><th>Fact</th><th>Topics</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="memory-tbody"></tbody>
                 </table>
             </div>
             <div class="modal-footer">
-                <span style="color:var(--color-text-secondary);">Up to 25 facts for the server</span>
+                <span>Up to 25 facts for the server</span>
                 <button class="button button-secondary" id="close-memory-btn">Close</button>
             </div>
         </div>
@@ -1537,7 +1501,7 @@
                 window.open(`${API_BASE}/export/download/${this.exportJobId}?format=${format}`, '_blank');
             }
 
-            // ===== FIX 2: EXPORT STATUS MODAL =====
+            // ===== EXPORT STATUS MODAL =====
             initExportStatusModal() {
                 document.getElementById('view-export-status-btn').addEventListener('click', () => this.openExportStatusModal());
                 document.getElementById('close-export-status-modal').addEventListener('click', () => this.closeExportStatusModal());
